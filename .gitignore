@@ -1,0 +1,14 @@
+# IDE related
+.vscode/
+.idea/
+
+# output files
+output/
+contract_wasm/
+contract_code/
+logs/
+!vendor/*
+xupercc
+account
+!account/
+.null
