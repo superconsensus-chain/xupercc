@@ -129,7 +129,7 @@ func CreateChain(c *gin.Context) {
 	log.Printf("create block chain successfully,txid: %s ",txid1)
 
 	to := args.Name
-	amount := "100"
+	amount := trans.Cfg.MinNewChainAmount
 	fee := "0"
 
 	txid2, fee, err := trans.Transfer(to, amount, fee, string(bytes))
