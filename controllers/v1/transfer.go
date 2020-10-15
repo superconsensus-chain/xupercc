@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jason-cn-dev/xuper-sdk-go/account"
-	"github.com/jason-cn-dev/xuper-sdk-go/transfer"
+	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/transfer"
 
-	"github.com/jason-cn-dev/xupercc/conf"
-	"github.com/jason-cn-dev/xupercc/controllers"
-	log "github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xupercc/conf"
+	"github.com/xuperchain/xupercc/controllers"
+	log "github.com/xuperchain/xupercc/utils"
 )
 
 func Transfer(c *gin.Context) {
@@ -47,7 +47,7 @@ func Transfer(c *gin.Context) {
 
 	amount := strconv.FormatInt(req.Amount, 10)
 	fee := strconv.FormatInt(req.Fee, 10)
-	txid, fee, err := trans.Transfer(req.To, amount, fee, req.Desc)
+	txid, err := trans.Transfer(req.To, amount, fee, req.Desc)
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, controllers.ErrorNotEnoughUtxo) {

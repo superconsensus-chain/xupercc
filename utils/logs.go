@@ -7,7 +7,7 @@ import (
 
 	"github.com/astaxie/beego/logs"
 
-	"github.com/jason-cn-dev/xupercc/conf"
+	"github.com/xuperchain/xupercc/conf"
 )
 
 //使用beego的log模块

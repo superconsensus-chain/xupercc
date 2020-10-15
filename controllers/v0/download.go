@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/jason-cn-dev/xupercc/conf"
-	"github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xupercc/conf"
+	"github.com/xuperchain/xupercc/utils"
 )
 
 func Download(c *gin.Context) {

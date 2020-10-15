@@ -3,11 +3,11 @@ package v2
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/jason-cn-dev/xuper-sdk-go/account"
-	"github.com/jason-cn-dev/xuper-sdk-go/transfer"
-	"github.com/jason-cn-dev/xupercc/conf"
-	"github.com/jason-cn-dev/xupercc/controllers"
-	log "github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/transfer"
+	"github.com/xuperchain/xupercc/conf"
+	"github.com/xuperchain/xupercc/controllers"
+	log "github.com/xuperchain/xupercc/utils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -75,7 +75,7 @@ func CreateChain(c *gin.Context) {
 	amount := trans.Cfg.MinNewChainAmount
 	fee := "0"
 
-	txid2, fee, err := trans.Transfer(to, amount, fee, string(bytes))
+	txid2, err := trans.Transfer(to, amount, fee, string(bytes))
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, controllers.ErrorNotEnoughUtxo) {

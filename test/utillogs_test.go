@@ -3,8 +3,8 @@ package test
 import (
 	"testing"
 
-	"github.com/jason-cn-dev/xupercc/conf"
-	log "github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xupercc/conf"
+	log "github.com/xuperchain/xupercc/utils"
 )
 
 //测试调用代码所在文件和行号的深度

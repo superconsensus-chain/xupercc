@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jason-cn-dev/xuper-sdk-go/account"
-	"github.com/jason-cn-dev/xuper-sdk-go/contract"
+	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/contract"
 
-	"github.com/jason-cn-dev/xupercc/conf"
-	"github.com/jason-cn-dev/xupercc/controllers"
+	"github.com/xuperchain/xupercc/conf"
+	"github.com/xuperchain/xupercc/controllers"
 )
 
 func Deploy(c *gin.Context) {

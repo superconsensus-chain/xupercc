@@ -1,6 +1,6 @@
 package controllers
 
-import "github.com/jason-cn-dev/xupercc/xkernel"
+import "github.com/xuperchain/xupercc/xkernel"
 
 type Req struct {
 	RequestId             string            `json:"request_id,omitempty"`

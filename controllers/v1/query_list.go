@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/jason-cn-dev/xupercc/controllers"
-	log "github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xupercc/controllers"
+	log "github.com/xuperchain/xupercc/utils"
 )
 
 func QueryLists(c *gin.Context) {

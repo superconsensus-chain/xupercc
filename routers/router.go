@@ -2,10 +2,10 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	v2 "github.com/jason-cn-dev/xupercc/controllers/v2"
+	v2 "github.com/xuperchain/xupercc/controllers/v2"
 
-	"github.com/jason-cn-dev/xupercc/controllers/v1"
-	"github.com/jason-cn-dev/xupercc/middlewares"
+	"github.com/xuperchain/xupercc/controllers/v1"
+	"github.com/xuperchain/xupercc/middlewares"
 )
 
 func NewRouter() *gin.Engine {
@@ -56,6 +56,8 @@ func NewRouter() *gin.Engine {
 	rv1.POST("query_block", v1.QueryBlock)
 	rv1.POST("query_list", v1.QueryLists)
 	rv1.POST("create_chain", v2.CreateChain)
-	
+	rv1.POST("get_netURL", v2.GetNetURL)
+
+
 	return r
 }

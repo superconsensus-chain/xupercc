@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jason-cn-dev/xupercc/controllers"
+	"github.com/xuperchain/xupercc/controllers"
 )
 
 func TestContractInvoke(t *testing.T) {

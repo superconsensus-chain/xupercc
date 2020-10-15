@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/jason-cn-dev/xuper-sdk-go/pb"
-	"github.com/jason-cn-dev/xuper-sdk-go/txhash"
+	"github.com/xuperchain/xuper-sdk-go/pb"
+	"github.com/xuperchain/xuper-sdk-go/txhash"
 )
 
 type HexID []byte
@@ -101,7 +101,7 @@ type Transaction struct {
 	Version           int32            `json:"version,omitempty"`
 	Autogen           bool             `json:"autogen,omitempty"`
 	Coinbase          bool             `json:"coinbase,omitempty"`
-	VoteCoinbase      bool             `json:"voteCoinbase,omitempty"`
+	//VoteCoinbase      bool             `json:"voteCoinbase,omitempty"`
 	TxInputsExt       []TxInputExt     `json:"txInputsExt,omitempty"`
 	TxOutputsExt      []TxOutputExt    `json:"txOutputsExt,omitempty"`
 	ContractRequests  []*InvokeRequest `json:"contractRequests,omitempty"`
@@ -463,7 +463,7 @@ func FullTx(tx *pb.Transaction) *Transaction {
 		Desc:              string(tx.Desc),
 		Autogen:           tx.Autogen,
 		Coinbase:          tx.Coinbase,
-		VoteCoinbase:      tx.VoteCoinbase,
+		//VoteCoinbase:      tx.VoteCoinbase,
 		Initiator:         tx.Initiator,
 		ReceivedTimestamp: tx.ReceivedTimestamp,
 	}

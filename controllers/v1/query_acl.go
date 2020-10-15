@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jason-cn-dev/xuper-sdk-go/pb"
+	"github.com/xuperchain/xuper-sdk-go/pb"
 	"google.golang.org/grpc"
 
-	"github.com/jason-cn-dev/xupercc/controllers"
-	log "github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xupercc/controllers"
+	log "github.com/xuperchain/xupercc/utils"
 )
 
 func QueryAcl(c *gin.Context) {

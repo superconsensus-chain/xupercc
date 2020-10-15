@@ -11,9 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/jason-cn-dev/xupercc/conf"
-	"github.com/jason-cn-dev/xupercc/controllers"
-	"github.com/jason-cn-dev/xupercc/utils"
+	"github.com/xuperchain/xupercc/conf"
+	"github.com/xuperchain/xupercc/controllers"
+	"github.com/xuperchain/xupercc/utils"
 )
 
 var fileMaxSize int64 = 2 << 20 // 2 MiB
