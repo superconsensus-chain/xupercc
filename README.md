@@ -18,7 +18,7 @@ sudo chmod 777 xdev/xdev
 
 编译
 ```go
-go build -mod vendor
+go build
 //此时会在当前目录下生成xupercc可执行文件
 ```
 
