@@ -60,6 +60,7 @@ func GetNetURL(c *gin.Context) {
 		"msg":  "调用成功",
 		"resp": controllers.Result{
 			Data:    rawUrl.RawUrl,
+			Address: req.Account,
 		},
 	})
 	return
