@@ -57,6 +57,7 @@ func NewRouter() *gin.Engine {
 	rv1.POST("query_list", v1.QueryLists)
 	rv1.POST("create_chain", v2.CreateChain)
 	rv1.POST("get_netURL", v2.GetNetURL)
+	rv1.POST("query_miners", v2.QueryMiners)
 
 
 	return r
