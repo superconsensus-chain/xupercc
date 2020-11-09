@@ -24,3 +24,5 @@ require (
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
+
+replace github.com/xuperchain/xuper-sdk-go v1.1.0 => github.com/chunqizhi/xuper-sdk-go v0.0.0-20201109033817-75e459c0e44f
