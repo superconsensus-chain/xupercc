@@ -21,4 +21,4 @@ crypto: "xchain"
 minNewChainAmount: "100"
 
 #是否开启无 token 交易
-noFee: true
+noFee: false
