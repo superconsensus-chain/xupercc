@@ -72,9 +72,11 @@ func CreateChain(c *gin.Context) {
 	}
 
 	to := args.Name
-	amount := trans.Cfg.MinNewChainAmount
+	amount := "0"
+	if !trans.Cfg.NoFee {
+		amount = trans.Cfg.MinNewChainAmount
+	}
 	fee := "0"
-
 	txid2, err := trans.Transfer(to, amount, fee, string(bytes))
 	if err != nil {
 		msg := err.Error()
