@@ -29,7 +29,7 @@ type Acl struct {
 	AksWeight map[string]float32 `json:"aksWeight"`
 }
 
-func InitAcl(account *account.Account, node, bcName, contractAccount string) *Acl {
+func InitAcl(account *account.Account, node, bcName, contractAccount, acl string) *Acl {
 	commConfig := config.GetInstance()
 
 	return &Acl{
@@ -39,6 +39,7 @@ func InitAcl(account *account.Account, node, bcName, contractAccount string) *Ac
 			XchainSer:       node,
 			ChainName:       bcName,
 			ContractAccount: contractAccount,
+			Desc: acl,
 		},
 	}
 }
@@ -57,6 +58,7 @@ func (c *Acl) AclIR(action, contractName, contractMethod string, aks map[string]
 		args["contract_name"] = []byte(contractName)
 		args["method_name"] = []byte(contractMethod)
 	}
+
 
 	var aksWeight string
 	format := `"%s": %.1f,`
@@ -80,7 +82,9 @@ func (c *Acl) AclIR(action, contractName, contractMethod string, aks map[string]
         `
 	acl = fmt.Sprintf(acl, aksWeight)
 	args["acl"] = []byte(acl)
-
+	if len(c.Desc) != 0 {
+		args["acl"] = []byte(c.Desc)
+	}
 	//for k, v := range args {
 	//	fmt.Println(k,string(v))
 	//}

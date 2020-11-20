@@ -40,8 +40,12 @@ func MethodAcl(c *gin.Context) {
 	for _, v := range req.Address {
 		ask[v] = 1
 	}
+	// 判断是否是使用 desc
+	if len(req.Args) != 0 {
+		req.Desc = req.Args["acl"]
+	}
 
-	acl := xkernel.InitAcl(acc, req.Node, req.BcName, req.ContractAccount)
+	acl := xkernel.InitAcl(acc, req.Node, req.BcName, req.ContractAccount, req.Desc)
 	//给服务费用的地址
 	acl.Cfg.ComplianceCheck.ComplianceCheckEndorseServiceAddr = acc.Address
 	//服务地址

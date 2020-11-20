@@ -37,18 +37,22 @@ func CreateContractAccount(c *gin.Context) {
 		log.Printf("mnemonic can not retrieve account, err: %s", err.Error())
 		return
 	}
+	// 判断是否是使用 desc
+	if len(req.Args) != 0 {
+		req.ContractAccount = req.Args["account_name"]
+		req.Desc = req.Args["acl"]
+	}
 
 	//有时候随机数会是0开头，fmt会截断它，所以使用for来跳过不符合长度的数
 	for len(req.ContractAccount) != 16 {
 		//req.ContractAccount = "1234567812345678"
 		req.ContractAccount = fmt.Sprintf("%08v", rand.New(rand.NewSource(time.Now().UnixNano())).Int63n(10000000000000000))
 	}
-	ca := xkernel.InitAcl(acc, req.Node, req.BcName, req.ContractAccount)
+	ca := xkernel.InitAcl(acc, req.Node, req.BcName, req.ContractAccount,req.Desc)
 	//给服务费用的地址
 	ca.Cfg.ComplianceCheck.ComplianceCheckEndorseServiceAddr = acc.Address
 	//服务地址
 	ca.Cfg.EndorseServiceHost = req.Node
-
 	gas, acl, txid, err := ca.CreateContractAccount()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
