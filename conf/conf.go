@@ -12,6 +12,7 @@ var (
 	Log    *LogConf
 	Req    *ReqConf
 	Cache  *CacheConf
+	Permission *PermissionConf
 )
 
 type AppConf struct {
@@ -45,6 +46,10 @@ type ReqConf struct {
 
 type CacheConf struct {
 	Size int `ini:"size"`
+}
+
+type PermissionConf struct {
+	FilePath string `ini:"file_path"`
 }
 
 //todo 有空了将这个改成yaml来配置 ini太麻烦了
@@ -94,6 +99,10 @@ func init() {
 		Size: 10,
 	}
 	cfg.Section("cache").MapTo(Cache)
+
+
+	Permission = &PermissionConf{}
+	cfg.Section("permission").MapTo(Permission)
 
 	//生产环境
 	if App.AppMode == "release" {

@@ -1,13 +1,13 @@
 package v1
 
 import (
+	"github.com/xuperchain/xupercc/conf"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xuperchain/xuper-sdk-go/account"
 	"github.com/xuperchain/xuper-sdk-go/contract"
 
-	"github.com/xuperchain/xupercc/conf"
 	"github.com/xuperchain/xupercc/controllers"
 	log "github.com/xuperchain/xupercc/utils"
 )
@@ -25,13 +25,14 @@ func GroupNode(c *gin.Context) {
 		return
 	}
 
-	acc, err := account.RetrieveAccount(req.Mnemonic, conf.Req.Language)
+	// 中间调用
+	acc, err := account.GetAccountFromFile(conf.Permission.FilePath)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
-			"msg":  "助记词无效",
+			"msg":  "无权限调用",
 		})
-		log.Printf("mnemonic can not retrieve account, err: %s", err.Error())
+		log.Printf("GetAccountFromFile, err: %s", err.Error())
 		return
 	}
 
