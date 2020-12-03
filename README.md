@@ -108,4 +108,7 @@ crypto: "xchain"
 
 #创建平行链所需要的最低费用，需要跟节点启动时的配置一样
 minNewChainAmount: "100"
+
+#是否开启无 token 交易
+noFee: true
 ```
