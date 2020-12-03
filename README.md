@@ -1,6 +1,6 @@
 # 超级链的后端
 
-## [查看API文档](超级链API文档_v0629.md)
+## [查看API文档](xuperccAPI.md)
 
 ## 使用说明
 
@@ -78,6 +78,10 @@ strength = 1
 [cache]
 # 区块和交易的缓存大小，建议不要超过15
 size = 10
+
+[permission]
+# 控制群组合约的地址私钥路径
+file_path = /home/chunqizhi/gopath/src/github.com/chunqizhi/xuperchain/node1/data/keys/private.key
 ```
 
 conf/sdk.yaml：这是sdk的配置，用来跟链交互用的
