@@ -1,9 +1,10 @@
 package v2
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/pb"
 	"github.com/xuperchain/xuper-sdk-go/transfer"
 	"github.com/xuperchain/xupercc/conf"
 	"github.com/xuperchain/xupercc/controllers"
@@ -22,20 +23,22 @@ type Desc struct {
 type Args struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
+	Group string `json:"group"`
+	Identities string `json:"identities"`
 }
 
 func CreateChain(c *gin.Context) {
 
 	req := new(controllers.Req)
 	err := c.ShouldBind(req)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code": 400,
-			"msg":  "参数无效",
-		})
-		log.Printf("param invalid, err: %s", err.Error())
-		return
-	}
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{
+	//		"code": 400,
+	//		"msg":  "参数无效",
+	//	})
+	//	log.Printf("param invalid, err: %s", err.Error())
+	//	return
+	//}
 
 	acc, err := account.RetrieveAccount(req.Mnemonic, conf.Req.Language)
 	if err != nil {
@@ -46,38 +49,61 @@ func CreateChain(c *gin.Context) {
 		log.Printf("mnemonic can not retrieve account, err: %s", err.Error())
 		return
 	}
-
+	fmt.Printf("D__acc.Address： %s \n",acc.Address)
 	trans := transfer.InitTrans(acc, req.Node, req.BcName)
 
 
 	args := Args{
 		Name: req.Args["name"],
 		Data: req.Args["data"],
+		Group: req.Args["group"],
+		Identities: req.Args["identities"],
 	}
 
-	desc := Desc{
-		Module: "kernel",
-		Method: "CreateBlockChain",
-		Args:   args,
+	//desc := Desc{
+	//	Module: "kernel",
+	//	//Method: "CreateBlockChain",
+	//	Method: req.Args["method"],
+	//	Args:   args,
+	//}
+
+	invokeRequests := &pb.InvokeRequest{
+		ModuleName: "xkernel",
+		ContractName: "$parachain",
+		MethodName: req.Args["method"],
+		Args:       make(map[string][]byte),
+	}
+	if args.Name != "" {
+		invokeRequests.Args["name"] = []byte(args.Name)
+	}
+	if args.Data != ""{
+		invokeRequests.Args["data"] = []byte(args.Data)
+	}
+	if args.Group != "" {
+		invokeRequests.Args["group"] = []byte(args.Group)
+	}
+	if args.Identities != ""{
+		invokeRequests.Args["identities"] = []byte(args.Identities)
 	}
 
-	bytes, err := json.Marshal(&desc)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code": 400,
-			"msg":  "参数无效",
-		})
-		log.Printf("json Marshal fail, err: %s", err.Error())
-		return
-	}
+	//_, err = json.Marshal(&desc)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{
+	//		"code": 400,
+	//		"msg":  "参数无效",
+	//	})
+	//	log.Printf("json Marshal fail, err: %s", err.Error())
+	//	return
+	//}
 
 	to := args.Name
 	amount := "0"
 	if !trans.Cfg.NoFee {
 		amount = trans.Cfg.MinNewChainAmount
 	}
-	fee := "0"
-	txid2, err := trans.Transfer(to, amount, fee, string(bytes))
+	fee := "1000"
+	//txid2, err := trans.Transfer(to, amount, fee, string(bytes))
+	txid2, err := trans.TransferToCreateChain(to, amount, fee,invokeRequests)
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, controllers.ErrorNotEnoughUtxo) {
