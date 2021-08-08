@@ -504,8 +504,8 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
-github.com/superconsensus-chain/xuper-sdk-go v1.0.4 h1:MUNFRbR+fXfNYOiB3KISWUYgeuhr2g+3RlH7N0iQydQ=
-github.com/superconsensus-chain/xuper-sdk-go v1.0.4/go.mod h1:9FwtM6ZyZNT5YOA1Wg7H5jofhNuhcn0KlmlQRHcmFcA=
+github.com/superconsensus-chain/xuper-sdk-go v1.0.6 h1:E9Dx5BtF7S/HBJNEVOxNA32VGKuCVhLDOPeibHCaenU=
+github.com/superconsensus-chain/xuper-sdk-go v1.0.6/go.mod h1:9FwtM6ZyZNT5YOA1Wg7H5jofhNuhcn0KlmlQRHcmFcA=
 github.com/syndtr/gocapability v0.0.0-20170704070218-db04d3cc01c8/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
 github.com/syndtr/goleveldb v0.0.0-20160425020131-cfa635847112/go.mod h1:Z4AUp2Km+PwemOoO/VB5AOx9XSsIItzFjoJlOSiYmn0=
 github.com/syndtr/goleveldb v0.0.0-20181127023241-353a9fca669c/go.mod h1:Z4AUp2Km+PwemOoO/VB5AOx9XSsIItzFjoJlOSiYmn0=

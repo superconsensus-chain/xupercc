@@ -102,8 +102,10 @@ func CreateChain(c *gin.Context) {
 		amount = trans.Cfg.MinNewChainAmount
 	}
 	fee := "1000"
+	rep := new(string)
 	//txid2, err := trans.Transfer(to, amount, fee, string(bytes))
-	txid2, err := trans.TransferToCreateChain(to, amount, fee,invokeRequests)
+	txid2, err := trans.TransferToCreateChain(to, amount, fee,invokeRequests,rep)
+	//fmt.Printf("D___rep %s \n",*rep)
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, controllers.ErrorNotEnoughUtxo) {
@@ -132,6 +134,7 @@ func CreateChain(c *gin.Context) {
 		"resp": controllers.Result{
 			Txid:    txid2,
 			GasUsed: i,
+			Data: *rep,
 		},
 	})
 }
