@@ -85,7 +85,7 @@ func init() {
 	cfg.Section("code").MapTo(Code)
 
 	Req = &ReqConf{
-		Language: 1,
+		Language: 2,
 		Strength: 1,
 	}
 	cfg.Section("req").MapTo(Req)
