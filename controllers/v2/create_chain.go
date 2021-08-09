@@ -25,6 +25,7 @@ type Args struct {
 	Data string `json:"data"`
 	Group string `json:"group"`
 	Identities string `json:"identities"`
+	Admin string `json:"admin"`
 }
 
 func CreateChain(c *gin.Context) {
@@ -58,6 +59,7 @@ func CreateChain(c *gin.Context) {
 		Data: req.Args["data"],
 		Group: req.Args["group"],
 		Identities: req.Args["identities"],
+		Admin: req.Args["admin"],
 	}
 
 	//desc := Desc{
@@ -84,6 +86,9 @@ func CreateChain(c *gin.Context) {
 	}
 	if args.Identities != ""{
 		invokeRequests.Args["identities"] = []byte(args.Identities)
+	}
+	if args.Admin != ""{
+		invokeRequests.Args["admin"] = []byte(args.Admin)
 	}
 
 	//_, err = json.Marshal(&desc)
