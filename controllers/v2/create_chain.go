@@ -106,7 +106,11 @@ func CreateChain(c *gin.Context) {
 	if !trans.Cfg.NoFee {
 		amount = trans.Cfg.MinNewChainAmount
 	}
-	fee := "1000"
+	fee := "1000000"
+	if invokeRequests.MethodName == "createChain"{
+		fee = "10000000003"
+	}
+	fmt.Printf("D__shou xu fei %s \n",fee)
 	rep := new(string)
 	//txid2, err := trans.Transfer(to, amount, fee, string(bytes))
 	txid2, err := trans.TransferToCreateChain(to, amount, fee,invokeRequests,rep)
