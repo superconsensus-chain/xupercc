@@ -42,7 +42,9 @@ func QueryMiners(c *gin.Context) {
 	request := &pb.DposStatusRequest{
 		Bcname: req.BcName,
 	}
-	response, err := client.DposStatus(ctx, request)
+	//response, err := client.DposStatus(ctx, request)
+	// getConsensusStatus方法在proto中定义，实现在xchain
+	response, err := client.GetConsensusStatus(ctx, request)
 	if err != nil {
 		log.Printf("client.DposStatus, err: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -61,12 +63,36 @@ func QueryMiners(c *gin.Context) {
 	//	})
 	//	return
 	//}
-	nodes := response.GetStatus().CheckResult
-	nodesBytes, _ := json.Marshal(nodes)
+	type ValidatorsInfo struct {
+		Validators		[]string	`json:"validators"`
+		Miner			string		`json:"miner"`
+		Curterm			int32		`json:"curterm"`
+		//Contract 		string		`json:"contract"`
+	}
+	var validatorsInfo = ValidatorsInfo{}
+	err = json.Unmarshal([]byte(response.ValidatorsInfo), &validatorsInfo)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+	var minersInfo = &pb.ConsensusStatus{
+		Term: 			validatorsInfo.Curterm,
+		Version:        response.Version,
+		ConsensusName:  response.ConsensusName,
+		StartHeight:    response.StartHeight,
+		Miner: 			validatorsInfo.Miner,
+		Validators: 	validatorsInfo.Validators,
+	}
+	//nodes := response.GetStatus().CheckResult
+	//nodesBytes, _ := json.Marshal(nodes)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "查询成功",
-		"resp": string(nodesBytes),
+		//"resp": string(nodesBytes),
+		"resp": minersInfo,
 	})
 }

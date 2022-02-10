@@ -25,4 +25,4 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
 
-replace github.com/xuperchain/xuper-sdk-go v1.1.0 => github.com/superconsensus-chain/xuper-sdk-go v1.0.6
+replace github.com/xuperchain/xuper-sdk-go v1.1.0 => github.com/superconsensus-chain/xuper-sdk-go v1.0.7
