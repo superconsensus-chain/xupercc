@@ -491,9 +491,9 @@ func FullTx(tx *pb.Transaction) *Transaction {
 	}
 	for _, outputExt := range tx.TxOutputsExt {
 		v := string(outputExt.Value)
-		if len(v) > 30 {
-			v = "value too long"
-		}
+		//if len(v) > 30 {
+		//	v = "value too long"
+		//}
 		t.TxOutputsExt = append(t.TxOutputsExt, TxOutputExt{
 			Bucket: outputExt.Bucket,
 			Key:    string(outputExt.Key),
@@ -511,9 +511,9 @@ func FullTx(tx *pb.Transaction) *Transaction {
 			}
 			for argKey, argV := range req.Args {
 				v := string(argV)
-				if len(argV) > 30 {
-					v = "value too long"
-				}
+				//if len(argV) > 30 {
+				//	v = "value too long"
+				//}
 				tmpReq.Args[argKey] = v
 			}
 			for _, rlimit := range req.ResourceLimits {
