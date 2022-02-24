@@ -499,6 +499,9 @@ func FullTx(tx *pb.Transaction) *Transaction {
 			// 合约code展示是乱码所以忽略
 			continue
 		}
+		if strings.HasSuffix(string(outputExt.Key), ".desc") {
+			v = hex.EncodeToString(outputExt.Value)
+		}
 		t.TxOutputsExt = append(t.TxOutputsExt, TxOutputExt{
 			Bucket: outputExt.Bucket,
 			Key:    string(outputExt.Key),
