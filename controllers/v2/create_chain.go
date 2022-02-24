@@ -108,7 +108,7 @@ func CreateChain(c *gin.Context) {
 	}
 	fee := "1000000"
 	if invokeRequests.MethodName == "createChain"{
-		fee = "10000000003"
+		fee = "100000000000"
 	}
 	fmt.Printf("D__shou xu fei %s \n",fee)
 	rep := new(string)
