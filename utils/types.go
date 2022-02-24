@@ -11,6 +11,7 @@ import (
 
 	"github.com/xuperchain/xuper-sdk-go/pb"
 	"github.com/xuperchain/xuper-sdk-go/txhash"
+	"strings"
 )
 
 type HexID []byte
@@ -494,6 +495,10 @@ func FullTx(tx *pb.Transaction) *Transaction {
 		//if len(v) > 30 {
 		//	v = "value too long"
 		//}
+		if strings.HasSuffix(string(outputExt.Key), ".code") {
+			// 合约code展示是乱码所以忽略
+			continue
+		}
 		t.TxOutputsExt = append(t.TxOutputsExt, TxOutputExt{
 			Bucket: outputExt.Bucket,
 			Key:    string(outputExt.Key),
@@ -514,6 +519,10 @@ func FullTx(tx *pb.Transaction) *Transaction {
 				//if len(argV) > 30 {
 				//	v = "value too long"
 				//}
+				if argKey == "contract_code" {
+					// 合约code展示是乱码所以忽略
+					continue
+				}
 				tmpReq.Args[argKey] = v
 			}
 			for _, rlimit := range req.ResourceLimits {
