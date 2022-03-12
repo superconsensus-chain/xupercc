@@ -9,7 +9,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/gin-gonic/gin"
 
-	"github.com/xuperchain/xupercc/conf"
+	"github.com/superconsensus-chain/xupercc/conf"
 )
 
 func Logs() gin.HandlerFunc {

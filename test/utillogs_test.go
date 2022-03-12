@@ -3,16 +3,17 @@ package test
 import (
 	"testing"
 
-	"github.com/xuperchain/xupercc/conf"
-	log "github.com/xuperchain/xupercc/utils"
+	"github.com/superconsensus-chain/xupercc/conf"
+	log "github.com/superconsensus-chain/xupercc/utils"
 )
 
 //测试调用代码所在文件和行号的深度
 func TestUtilLogs(t *testing.T) {
 
 	conf.Init()
-	log.Printf("hello","world","!")
+	log.Printf("hello", "world", "!")
 }
+
 /**
 0 log.go:276
 1 log.go:443
@@ -24,4 +25,4 @@ func TestUtilLogs(t *testing.T) {
 7 ???:0
 -1 extern.go:182
 
- */
+*/

@@ -1,15 +1,16 @@
 package v1
 
 import (
+	"encoding/hex"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/v2/account"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
-	"github.com/xuperchain/xupercc/xkernel"
+	"github.com/superconsensus-chain/xupercc/conf"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	log "github.com/superconsensus-chain/xupercc/utils"
 )
 
 func MethodAcl(c *gin.Context) {
@@ -36,12 +37,27 @@ func MethodAcl(c *gin.Context) {
 	}
 
 	//所有地址的权限都是1
-	ask := make(map[string]float32)
-	for _, v := range req.Address {
+	ask := make(map[string]float64)
+	for _, v := range req.Address { // todo 这里只是把每个add都设置为可调用，并没有将个别剔除，待优化
 		ask[v] = 1
 	}
+	xclient, err := xuper.New(req.Node)
+	if err != nil {
+		return
+	}
+	newacl := &xuper.ACL{
+		PM: xuper.PermissionModel{
+			Rule:        1,
+			AcceptValue: 1.0,
+		},
+		AksWeight: ask,
+	}
+	tx, err := xclient.SetMethodACL(acc, req.ContractName, req.MethodName, newacl)
+	if err != nil {
+		return
+	}
 
-	acl := xkernel.InitAcl(acc, req.Node, req.BcName, req.ContractAccount)
+	/*acl := xkernel.InitAcl(acc, req.Node, req.BcName, req.ContractAccount)
 	//给服务费用的地址
 	acl.Cfg.ComplianceCheck.ComplianceCheckEndorseServiceAddr = acc.Address
 	//服务地址
@@ -56,13 +72,13 @@ func MethodAcl(c *gin.Context) {
 		})
 		log.Printf("set method acl fail, err: %s", err.Error())
 		return
-	}
+	}*/
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "设置成功",
 		"resp": controllers.Result{
-			Txid: txid,
+			Txid: hex.EncodeToString(tx.Tx.Txid),
 		},
 	})
 }

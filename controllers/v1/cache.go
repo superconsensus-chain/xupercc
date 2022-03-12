@@ -3,8 +3,8 @@ package v1
 import (
 	"sync"
 
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/utils"
+	"github.com/superconsensus-chain/xupercc/conf"
+	"github.com/superconsensus-chain/xupercc/utils"
 )
 
 var (

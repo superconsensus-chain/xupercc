@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	accountsdk "github.com/xuperchain/xuper-sdk-go/account"
-	p2p_base "github.com/xuperchain/xuperchain/core/p2p/base"
+	p2p_base "github.com/superconsensus/matrixcore/kernel/network/p2p"
+	accountsdk "github.com/xuperchain/xuper-sdk-go/v2/account"
 )
 
 //创建账号
@@ -53,7 +53,6 @@ func main() {
 	}
 
 	fmt.Println("create account success, output:", keys)
-
 
 	netkeys := fmt.Sprintf(output, t, acc.Address, "netkeys")
 	err = p2p_base.GenerateKeyPairWithPath(netkeys)

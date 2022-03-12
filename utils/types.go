@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/xuperchain/xuper-sdk-go/pb"
-	"github.com/xuperchain/xuper-sdk-go/txhash"
+	"github.com/xuperchain/xuperchain/service/pb"
+	//"github.com/xuperchain/xuper-sdk-go/v2/common"
 	"strings"
 )
 
@@ -71,7 +71,7 @@ type SignatureInfo struct {
 	Sign      HexID  `json:"sign,omitempty"`
 }
 
-type QCState int32
+type QCStateX int32
 
 type SignInfo struct {
 	Address   string `protobuf:"bytes,1,opt,name=Address,proto3" json:"Address,omitempty"`
@@ -86,22 +86,22 @@ type QCSignInfos struct {
 type QuorumCert struct {
 	ProposalId  string       `protobuf:"bytes,1,opt,name=ProposalId,proto3" json:"ProposalId,omitempty"`
 	ProposalMsg []byte       `protobuf:"bytes,2,opt,name=ProposalMsg,proto3" json:"ProposalMsg,omitempty"`
-	Type        QCState      `protobuf:"varint,3,opt,name=Type,proto3,enum=pb.QCState" json:"Type,omitempty"`
+	Type        QCStateX     `protobuf:"varint,3,opt,name=Type,proto3,enum=pb.QCStateX" json:"Type,omitempty"`
 	ViewNumber  int64        `protobuf:"varint,4,opt,name=ViewNumber,proto3" json:"ViewNumber,omitempty"`
 	SignInfos   *QCSignInfos `protobuf:"bytes,5,opt,name=SignInfos,proto3" json:"SignInfos,omitempty"`
 }
 
 type Transaction struct {
-	Txid              HexID            `json:"txid,omitempty"`
-	Blockid           HexID            `json:"blockid,omitempty"`
-	TxInputs          []TxInput        `json:"txInputs,omitempty"`
-	TxOutputs         []TxOutput       `json:"txOutputs,omitempty"`
-	Desc              string           `json:"desc,omitempty"`
-	Nonce             string           `json:"nonce,omitempty"`
-	Timestamp         int64            `json:"timestamp,omitempty"`
-	Version           int32            `json:"version,omitempty"`
-	Autogen           bool             `json:"autogen,omitempty"`
-	Coinbase          bool             `json:"coinbase,omitempty"`
+	Txid      HexID      `json:"txid,omitempty"`
+	Blockid   HexID      `json:"blockid,omitempty"`
+	TxInputs  []TxInput  `json:"txInputs,omitempty"`
+	TxOutputs []TxOutput `json:"txOutputs,omitempty"`
+	Desc      string     `json:"desc,omitempty"`
+	Nonce     string     `json:"nonce,omitempty"`
+	Timestamp int64      `json:"timestamp,omitempty"`
+	Version   int32      `json:"version,omitempty"`
+	Autogen   bool       `json:"autogen,omitempty"`
+	Coinbase  bool       `json:"coinbase,omitempty"`
 	//VoteCoinbase      bool             `json:"voteCoinbase,omitempty"`
 	TxInputsExt       []TxInputExt     `json:"txInputsExt,omitempty"`
 	TxOutputsExt      []TxOutputExt    `json:"txOutputsExt,omitempty"`
@@ -202,7 +202,7 @@ func FromPBJustify(qc *pb.QuorumCert) *QuorumCert {
 	if qc != nil {
 		justify.ProposalId = hex.EncodeToString(qc.ProposalId)
 		justify.ProposalMsg = qc.ProposalMsg
-		justify.Type = QCState(int(qc.Type))
+		justify.Type = QCStateX(int(qc.Type))
 		justify.ViewNumber = qc.ViewNumber
 		justify.SignInfos = &QCSignInfos{
 			QCSignInfos: make([]*SignInfo, 0),
@@ -247,11 +247,11 @@ type ContractStatData struct {
 }
 
 type ChainStatus struct {
-	Name          string         `json:"name,omitempty"`
-	LedgerMeta    LedgerMeta     `json:"ledger,omitempty"`
+	Name       string     `json:"name,omitempty"`
+	LedgerMeta LedgerMeta `json:"ledger,omitempty"`
 	//UtxoMeta      UtxoMeta       `json:"utxo,omitempty"`
 	//BranchBlockid []string       `json:"branchBlockid,omitempty"`
-	Block         *InternalBlock `json:"block,omitempty"` //增加区块数据
+	Block *InternalBlock `json:"block,omitempty"` //增加区块数据
 }
 
 type SystemStatus struct {
@@ -326,7 +326,7 @@ func FromSystemStatusPB(statuspb *pb.SystemsStatus) *SystemStatus {
 			//},
 
 			//BranchBlockid: chain.GetBranchBlockid(),
-			Block:         FromInternalBlockPB(block),
+			Block: FromInternalBlockPB(block),
 		})
 	}
 	status.Peers = statuspb.GetPeerUrls()
@@ -456,14 +456,14 @@ func SimpleBlocks(blocks []*pb.InternalBlock) []*InternalBlock {
 
 func FullTx(tx *pb.Transaction) *Transaction {
 	t := &Transaction{
-		Txid:              tx.Txid,
-		Blockid:           tx.Blockid,
-		Nonce:             tx.Nonce,
-		Timestamp:         tx.Timestamp,
-		Version:           tx.Version,
-		Desc:              string(tx.Desc),
-		Autogen:           tx.Autogen,
-		Coinbase:          tx.Coinbase,
+		Txid:      tx.Txid,
+		Blockid:   tx.Blockid,
+		Nonce:     tx.Nonce,
+		Timestamp: tx.Timestamp,
+		Version:   tx.Version,
+		Desc:      string(tx.Desc),
+		Autogen:   tx.Autogen,
+		Coinbase:  tx.Coinbase,
 		//VoteCoinbase:      tx.VoteCoinbase,
 		Initiator:         tx.Initiator,
 		ReceivedTimestamp: tx.ReceivedTimestamp,
@@ -574,11 +574,11 @@ func SumHash(tx *pb.Transaction) error {
 	fmt.Println("sha1:", sha1.Sum(j))
 	fmt.Println("sha256:", sha256.Sum256(j))
 
-	txid, err := txhash.MakeTransactionID(tx)
-	if err != nil {
-		return err
-	}
-	fmt.Println("txid:", hex.EncodeToString(txid))
+	//txid, err := common.MakeTransactionID(tx)
+	//if err != nil {
+	//	return err
+	//}
+	//fmt.Println("txid:", hex.EncodeToString(txid))
 	return nil
 }
 

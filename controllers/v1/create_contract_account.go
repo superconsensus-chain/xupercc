@@ -1,18 +1,16 @@
 package v1
 
 import (
-	"fmt"
-	"math/rand"
-	"net/http"
-	"time"
-
+	"encoding/hex"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/v2/account"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
+	"net/http"
 
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
-	"github.com/xuperchain/xupercc/xkernel"
+	"github.com/superconsensus-chain/xupercc/conf"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	log "github.com/superconsensus-chain/xupercc/utils"
 )
 
 func CreateContractAccount(c *gin.Context) {
@@ -38,7 +36,21 @@ func CreateContractAccount(c *gin.Context) {
 		return
 	}
 
-	//有时候随机数会是0开头，fmt会截断它，所以使用for来跳过不符合长度的数
+	xclient, err := xuper.New(req.Node)
+	if err != nil {
+		return
+	}
+	tx, err := xclient.CreateContractAccount(acc, "XC"+req.ContractAccount+"@"+req.BcName)
+	if err != nil {
+		return
+	}
+	acl := xuper.ACL{}
+	err = json.Unmarshal(tx.ContractResponse.Body, &acl)
+	if err != nil {
+		return
+	}
+
+	/*//有时候随机数会是0开头，fmt会截断它，所以使用for来跳过不符合长度的数
 	for len(req.ContractAccount) != 16 {
 		//req.ContractAccount = "1234567812345678"
 		req.ContractAccount = fmt.Sprintf("%08v", rand.New(rand.NewSource(time.Now().UnixNano())).Int63n(10000000000000000))
@@ -59,16 +71,16 @@ func CreateContractAccount(c *gin.Context) {
 		log.Printf("create contract account fail, err: %s", err.Error())
 		return
 	}
-
+	*/
 	//log.Printf("create contract account success, txid: %s", txid)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "创建成功",
 		"resp": controllers.Result{
-			Txid:            txid,
-			AccountAcl:      acl,
-			GasUsed:         gas,
+			Txid:            hex.EncodeToString(tx.Tx.Txid),
+			AccountAcl:      &acl,
+			GasUsed:         tx.GasUsed,
 			ContractAccount: "XC" + req.ContractAccount + "@" + req.BcName,
 		},
 	})

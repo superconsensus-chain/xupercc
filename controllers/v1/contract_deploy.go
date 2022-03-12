@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"encoding/hex"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -8,12 +9,12 @@ import (
 	"regexp"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
+	"github.com/xuperchain/xuper-sdk-go/v2/account"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
-	"github.com/xuperchain/xupercc/xkernel"
+	"github.com/superconsensus-chain/xupercc/conf"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	log "github.com/superconsensus-chain/xupercc/utils"
 )
 
 var codeMaxSize = 2 << 20 // 2 MiB
@@ -65,10 +66,10 @@ func ContractDeploy(c *gin.Context) {
 func check(c *gin.Context, req *controllers.Req) bool {
 
 	//格式检查
-	if req.Runtime != "c" && req.Runtime != "go" {
+	if req.Runtime != "c" && req.Runtime != "go" && req.Runtime != "solidity" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
-			"msg":  "合约格式无效，当前只支持c和go",
+			"msg":  "合约格式无效，当前只支持c和go以及solidity",
 		})
 		log.Printf("runtime invalid, current code runtime: %s", req.Runtime)
 		return false
@@ -76,7 +77,7 @@ func check(c *gin.Context, req *controllers.Req) bool {
 
 	//名称检查
 	ccname := filepath.Base(req.ContractName)
-	r := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{4,16}$`)
+	r := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{3,15}$`)
 	if !r.MatchString(ccname) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
@@ -111,11 +112,11 @@ func check(c *gin.Context, req *controllers.Req) bool {
 //保存文件
 func save(c *gin.Context, req *controllers.Req) bool {
 	//存放目录
-	err := os.MkdirAll(conf.Code.CodePath, os.ModePerm)
+	err := os.MkdirAll(conf.Code.CodePath, 0755)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 500,
-			"msg":  "系统内部错误",
+			"code":  500,
+			"msg":   "系统内部错误",
 			"error": err.Error(),
 		})
 		log.Printf("mkdir fail, err: %s", err.Error())
@@ -126,8 +127,10 @@ func save(c *gin.Context, req *controllers.Req) bool {
 	var filename string //文件保存名称
 	if req.Runtime == "go" {
 		filename = req.ContractName + ".go"
-	} else {
+	} else if req.Runtime == "c" {
 		filename = req.ContractName + ".cc"
+	} else if req.Runtime == "solidity" {
+		filename = req.ContractName + ".sol"
 	}
 	codefile := filepath.Join(conf.Code.CodePath, filename) //文件存放位置
 	//codefile := conf.Code.CodePath + filename //担心CodePath会有问题，所有用filepath.Join
@@ -135,8 +138,8 @@ func save(c *gin.Context, req *controllers.Req) bool {
 	err = ioutil.WriteFile(codefile, code, os.ModePerm)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 500,
-			"msg":  "系统内部错误",
+			"code":  500,
+			"msg":   "系统内部错误",
 			"error": err.Error(),
 		})
 		log.Printf("contract save fail, err: %s", err.Error())
@@ -149,18 +152,22 @@ func save(c *gin.Context, req *controllers.Req) bool {
 
 //编译合约
 func build(c *gin.Context, req *controllers.Req) bool {
-	var wasmfile string
+	var builtFile string
 	var err error
 	if req.Runtime == "go" {
 		filename := req.ContractName + ".go"
 		err = controllers.BuildGo(filename)
 		//wasmfile = conf.Code.WasmPath + req.ContractName + ".go.wasm"
-		wasmfile = filepath.Join(conf.Code.WasmPath, req.ContractName+".go.wasm")
-	} else {
+		builtFile = filepath.Join(conf.Code.WasmPath, req.ContractName+".go.native")
+	} else if req.Runtime == "c" {
 		filename := req.ContractName + ".cc"
 		err = controllers.BuildCC(filename)
 		//wasmfile = conf.Code.WasmPath + req.ContractName + ".wasm"
-		wasmfile = filepath.Join(conf.Code.WasmPath, req.ContractName+".wasm")
+		builtFile = filepath.Join(conf.Code.WasmPath, req.ContractName+".wasm")
+	} else if req.Runtime == "solidity" {
+		err = controllers.BuildSol(req.ContractName) // 专门不带.sol后缀
+		// 实际上solc编译出来的文件应该有两个，一个bin后缀，一个abi后缀，且文件
+		builtFile = filepath.Join(conf.Code.WasmPath, req.ContractName+".bin")
 	}
 
 	if err != nil {
@@ -169,11 +176,11 @@ func build(c *gin.Context, req *controllers.Req) bool {
 			"msg":   "合约编译失败，请检查是否有误",
 			"error": err.Error(),
 		})
-		log.Printf("build file fail, err: %s", err.Error())
+		log.Printf("build %s file fail (langType: %s), err: %s", req.ContractName, req.Runtime, err.Error())
 		return false
 	}
 
-	log.Printf("file builded, file: %s", wasmfile)
+	log.Printf("file builded, file: %s", builtFile)
 	return true
 }
 
@@ -190,44 +197,114 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		return
 	}
 
-	//部署合约
-	contract := xkernel.InitContract(acc, req.Node, req.BcName, req.ContractAccount, req.ContractName)
-	//给服务费用的地址
-	contract.Cfg.ComplianceCheck.ComplianceCheckEndorseServiceAddr = acc.Address
-	//服务地址
-	contract.Cfg.EndorseServiceHost = req.Node
-
-	var action string
-	if req.Upgrade {
-		action = xkernel.UPGEADE
-	} else {
-		action = xkernel.DEPLOY
-	}
-
-	var wasmfile string
-	if req.Runtime == "go" {
-		//wasmfile = conf.Code.WasmPath + req.ContractName + ".go.wasm"
-		wasmfile = filepath.Join(conf.Code.WasmPath, req.ContractName+".go.wasm")
-	} else {
-		//wasmfile = conf.Code.WasmPath + req.ContractName + ".wasm"
-		wasmfile = filepath.Join(conf.Code.WasmPath, req.ContractName+".wasm")
-	}
-	txid, err := contract.ContractDoit(action, wasmfile, req.Runtime, req.Args)
+	xclinet, err := xuper.New(req.Node)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":  400,
-			"msg":   "部署失败",
-			"error": err.Error(),
-		})
-		log.Printf("deploy contract fail, err: %s", err.Error())
+		log.Println("xupercc new xchain client err", err)
+		record(c, err.Error())
 		return
 	}
-
-	log.Printf("deploy contract success, txid: %s", txid)
+	setContractE := acc.SetContractAccount(req.ContractAccount)
+	if setContractE != nil {
+		log.Printf("set contract account failed, error=", setContractE)
+		record(c, setContractE.Error())
+		return
+	}
+	tx := &xuper.Transaction{}
+	if req.Runtime == "c" {
+		file := filepath.Join(conf.Code.WasmPath, req.ContractName+".wasm")
+		contractCode, err := ioutil.ReadFile(file)
+		if err != nil {
+			log.Printf("get wasm contract filed, error=%s, filepath=%s", err, file)
+			record(c, err.Error())
+			return
+		}
+		if req.Upgrade {
+			tx, err = xclinet.UpgradeWasmContract(acc, req.ContractName, contractCode, xuper.WithBcname(req.BcName))
+			if err != nil {
+				log.Println("upgrade wasm contract failed, error=", err)
+				record(c, err.Error())
+				return
+			}
+		} else {
+			tx, err = xclinet.DeployWasmContract(acc, req.ContractName, contractCode, req.Args, xuper.WithBcname(req.BcName))
+			if err != nil {
+				log.Println("deploy wasm contract failed, error=", err)
+				record(c, err.Error())
+				return
+			}
+		}
+	} else if req.Runtime == "go" { // 还支持java native合约，代码使用maven编译，目前就先只使用go native
+		file := filepath.Join(conf.Code.WasmPath, req.ContractName+".go.native")
+		contractcode, err := ioutil.ReadFile(file)
+		if err != nil {
+			log.Println("get go native contract code filed, error=", err)
+			record(c, err.Error())
+			return
+		}
+		if req.Upgrade {
+			tx, err = xclinet.UpgradeNativeContract(acc, req.ContractName, contractcode, xuper.WithBcname(req.BcName))
+			if err != nil {
+				log.Println("upgrade native contract failed, error=", err)
+				record(c, err.Error())
+				return
+			}
+		} else {
+			tx, err = xclinet.DeployNativeGoContract(acc, req.ContractName, contractcode, req.Args, xuper.WithBcname(req.BcName))
+			if err != nil {
+				log.Println("deploy native go contract failed, error=", err)
+				record(c, err.Error())
+				return
+			}
+		}
+	} else if req.Runtime == "solidity" {
+		// solidity合约暂不支持升级
+		if req.Upgrade {
+			log.Println("solidity合约暂不支持升级")
+			record(c, "solidity合约暂不支持升级")
+			return
+		}
+		binfile := filepath.Join(conf.Code.WasmPath, req.ContractName, req.ContractName+".bin")
+		bincode, err := ioutil.ReadFile(binfile)
+		if err != nil {
+			log.Println("get go native contract code filed, error=", err)
+			// 因为接口不规范传参导致无法部署的合约编译结果就删了
+			os.RemoveAll(filepath.Join(conf.Code.WasmPath, req.ContractName))
+			record(c, "注意参数规范，contract_name应与源代码中声明的主合约名一致")
+			return
+		}
+		abifile := filepath.Join(conf.Code.WasmPath, req.ContractName, req.ContractName+".abi")
+		abicode, err := ioutil.ReadFile(abifile)
+		if err != nil {
+			log.Println("get go native contract code filed, error=", err)
+			os.RemoveAll(filepath.Join(conf.Code.WasmPath, req.ContractName))
+			record(c, "注意参数规范，contract_name应与源代码中声明的主合约名一致")
+			return
+		}
+		tx, err = xclinet.DeployEVMContract(acc, req.ContractName, abicode, bincode, req.Args, xuper.WithBcname(req.BcName))
+		if err != nil {
+			log.Println("deploy evm contract failed, error=", err)
+			record(c, err.Error())
+			return
+		}
+	} else {
+		record(c, "不支持的合约语言")
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "部署成功",
-		"resp": controllers.Result{Txid: txid},
+		"resp": controllers.Result{
+			Txid: hex.EncodeToString(tx.Tx.Txid),
+			GasUsed: tx.GasUsed,
+		},
+	})
+}
+
+func record(c *gin.Context, err string) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"code":  400,
+		"msg":   "部署失败",
+		"error": err,
 	})
 }

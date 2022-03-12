@@ -1,25 +1,11 @@
 package xkernel
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"strconv"
-
-	"github.com/golang/protobuf/proto"
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/config"
-	"github.com/xuperchain/xuper-sdk-go/pb"
-	"github.com/xuperchain/xuper-sdk-go/xchain"
-)
-
 const (
-	UPGEADE = "Upgrade"
-	DEPLOY  = "Deploy"
+	UPGEADE = "Upgrade" // upgradeContract
+	DEPLOY  = "Deploy" // deployContract
 )
 
-type Contract struct {
+/*type Contract struct {
 	ContractName string
 	xchain.Xchain
 }
@@ -58,10 +44,20 @@ func (c *Contract) ContractIR(action, codepath, runtime string, arg map[string]s
 	}
 	desc := &pb.WasmCodeDesc{
 		Runtime: runtime,
+		//ContractType: "wasm",
 	}
 	contractDesc, _ := proto.Marshal(desc)
 
-	args := map[string][]byte{
+	// contractType结合pb.invokeRequest.contractName以及DEPLOY常量=deployContract，是可以实现如终端的效果，即
+	/*if runtime == "go" {
+		desc = &pb.WasmCodeDesc{
+			Runtime: runtime,
+			ContractType: "native",
+		}
+		contractDesc, _ = proto.Marshal(desc)
+	}*/
+
+	/*args := map[string][]byte{
 		"account_name":  []byte(c.ContractAccount),
 		"contract_name": []byte(c.ContractName),
 		"contract_code": contractCode,
@@ -71,6 +67,7 @@ func (c *Contract) ContractIR(action, codepath, runtime string, arg map[string]s
 
 	return &pb.InvokeRequest{
 		ModuleName: "xkernel",
+		//ContractName: "$contract",
 		MethodName: action,
 		Args:       args,
 	}
@@ -137,4 +134,4 @@ func (c *Contract) Post(preExeWithSelRes *pb.PreExecWithSelectUTXOResponse) (str
 	c.TotalToAmount = "0"
 
 	return c.GenCompleteTxAndPost(preExeWithSelRes, "")
-}
+}*/

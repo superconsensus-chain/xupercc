@@ -1,6 +1,8 @@
 package controllers
 
-import "github.com/xuperchain/xupercc/xkernel"
+import (
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
+)
 
 type Req struct {
 	RequestId             string            `json:"request_id,omitempty"`
@@ -20,6 +22,7 @@ type Req struct {
 	ContractName          string            `json:"contract_name,omitempty"`
 	ContractFile          string            `json:"-"`
 	ContractCode          string            `json:"contract_code,omitempty"`
+	ModuleName            string            `json:"module_name,omitempty"`
 	MethodName            string            `json:"method_name,omitempty"`
 	Args                  map[string]string `json:"args,omitempty"`
 	Query                 bool              `json:"query,omitempty"`
@@ -43,13 +46,13 @@ type Resp struct {
 }
 
 type Result struct {
-	Txid            string      `json:"txid,omitempty"`
-	Data            string      `json:"data,omitempty"`
-	GasUsed         int64       `json:"gas_used,omitempty"`
-	Mnemonic        string      `json:"mnemonic,omitempty"`
-	Address         string      `json:"address,omitempty"`
-	AccountAcl      *xkernel.Acl `json:"account_acl,omitempty"`
-	AccountBalance  string      `json:"account_balance,omitempty"`
-	Tx              string      `json:"tx,omitempty"`
-	ContractAccount string      `json:"contract_account,omitempty"`
+	Txid            string     `json:"txid,omitempty"`
+	Data            string     `json:"data,omitempty"`
+	GasUsed         int64      `json:"gas_used,omitempty"`
+	Mnemonic        string     `json:"mnemonic,omitempty"`
+	Address         string     `json:"address,omitempty"`
+	AccountAcl      *xuper.ACL `json:"account_acl,omitempty"`
+	AccountBalance  string     `json:"account_balance,omitempty"`
+	Tx              string     `json:"tx,omitempty"`
+	ContractAccount string     `json:"contract_account,omitempty"`
 }

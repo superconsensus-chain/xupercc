@@ -1,16 +1,16 @@
 package xkernel
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"strconv"
-	"strings"
-
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/config"
-	"github.com/xuperchain/xuper-sdk-go/pb"
-	"github.com/xuperchain/xuper-sdk-go/xchain"
+//"encoding/json"
+//"fmt"
+//"log"
+//"strconv"
+//"strings"
+//
+//"github.com/xuperchain/xuper-sdk-go/v2/account"
+//"github.com/xuperchain/xuper-sdk-go/config"
+//"github.com/xuperchain/xuperchain/service/pb"
+//"github.com/xuperchain/xuper-sdk-go/xchain"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 	METHOD  = "SetMethodAcl"
 )
 
-type Acl struct {
+/*type Acl struct {
 	xchain.Xchain `json:"-"`
 
 	Pm struct {
@@ -27,9 +27,9 @@ type Acl struct {
 		AcceptValue float32 `json:"acceptValue"`
 	} `json:"pm"`
 	AksWeight map[string]float32 `json:"aksWeight"`
-}
+}*/
 
-func InitAcl(account *account.Account, node, bcName, contractAccount string) *Acl {
+/*func InitAcl(account *account.Account, node, bcName, contractAccount string) *Acl {
 	commConfig := config.GetInstance()
 
 	return &Acl{
@@ -41,9 +41,9 @@ func InitAcl(account *account.Account, node, bcName, contractAccount string) *Ac
 			ContractAccount: contractAccount,
 		},
 	}
-}
+}*/
 
-func (c *Acl) AclIR(action, contractName, contractMethod string, aks map[string]float32) *pb.InvokeRequest {
+/*func (c *Acl) AclIR(action, contractName, contractMethod string, aks map[string]float32) *pb.InvokeRequest {
 	args := make(map[string][]byte)
 
 	switch action {
@@ -90,9 +90,9 @@ func (c *Acl) AclIR(action, contractName, contractMethod string, aks map[string]
 		MethodName: action,
 		Args:       args,
 	}
-}
+}*/
 
-func (c *Acl) AclDoit(action, contractName, contractMethod string, aks map[string]float32) (string, error) {
+/*func (c *Acl) AclDoit(action, contractName, contractMethod string, aks map[string]float32) (string, error) {
 	// preExe
 	preSelectUTXOResponse, err := c.Pre(action, contractName, contractMethod, aks)
 	if err != nil {
@@ -101,9 +101,9 @@ func (c *Acl) AclDoit(action, contractName, contractMethod string, aks map[strin
 	}
 	// post
 	return c.Post(preSelectUTXOResponse)
-}
+}*/
 
-func (c *Acl) Pre(action, contractName, contractMethod string, aks map[string]float32) (*pb.PreExecWithSelectUTXOResponse, error) {
+/*func (c *Acl) Pre(action, contractName, contractMethod string, aks map[string]float32) (*pb.PreExecWithSelectUTXOResponse, error) {
 	// generate preExe request
 	var invokeRequests []*pb.InvokeRequest
 	invokeRequest := c.AclIR(action, contractName, contractMethod, aks)
@@ -134,9 +134,9 @@ func (c *Acl) Pre(action, contractName, contractMethod string, aks map[string]fl
 
 	// preExe
 	return c.PreExecWithSelecUTXO()
-}
+}*/
 
-func (c *Acl) Post(preExeWithSelRes *pb.PreExecWithSelectUTXOResponse) (string, error) {
+/*func (c *Acl) Post(preExeWithSelRes *pb.PreExecWithSelectUTXOResponse) (string, error) {
 	// populates fields
 	var authRequires []string
 	if c.ContractAccount != "" {
@@ -153,9 +153,9 @@ func (c *Acl) Post(preExeWithSelRes *pb.PreExecWithSelectUTXOResponse) (string, 
 	c.TotalToAmount = "0"
 
 	return c.GenCompleteTxAndPost(preExeWithSelRes, "")
-}
+}*/
 
-func (c *Acl) CreateContractAccount() (gas int64, acl *Acl, txid string, err error) {
+/*func (c *Acl) CreateContractAccount() (gas int64, acl *Acl, txid string, err error) {
 	aks := map[string]float32{
 		c.Account.Address: 1,
 	}
@@ -199,4 +199,4 @@ func (c *Acl) CreateContractAccount() (gas int64, acl *Acl, txid string, err err
 		return
 	}
 	return resp.Response.GasUsed, acl, txid, err
-}
+}*/

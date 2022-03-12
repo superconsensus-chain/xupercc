@@ -3,11 +3,13 @@ package xkernel
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 	"testing"
 )
 
 func TestAcl(t *testing.T) {
-	acl := new(Acl)
+	acl := xuper.ACL{}
+	//acl := new(Acl)
 	data := `
 {
 	"pm":{

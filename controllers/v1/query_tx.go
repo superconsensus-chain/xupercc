@@ -7,17 +7,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/pb"
-	"github.com/xuperchain/xuper-sdk-go/transfer"
+	"github.com/xuperchain/xuperchain/service/pb"
+	//"github.com/xuperchain/xuper-sdk-go/transfer"
 	"google.golang.org/grpc"
 
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	log "github.com/superconsensus-chain/xupercc/utils"
 )
 
-func QueryTxSDK(c *gin.Context) {
+/*func QueryTxSDK(c *gin.Context) {
 
 	req := new(controllers.Req)
 	err := c.ShouldBind(req)
@@ -64,7 +62,7 @@ func QueryTxSDK(c *gin.Context) {
 			Tx: tx.String(),
 		},
 	})
-}
+}*/
 
 func QueryTx(c *gin.Context) {
 

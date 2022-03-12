@@ -3,14 +3,13 @@ package v2
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/pb"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	log "github.com/superconsensus-chain/xupercc/utils"
+	"github.com/xuperchain/xuperchain/service/pb"
 	"google.golang.org/grpc"
 	"net/http"
 	"time"
 )
-
 
 func GetNetURL(c *gin.Context) {
 
@@ -29,7 +28,7 @@ func GetNetURL(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
-			"msg":  "grpc dial error: "+err.Error(),
+			"msg":  "grpc dial error: " + err.Error(),
 		})
 		log.Printf("grpc dial fail, err: %s", err.Error())
 		return
@@ -40,17 +39,17 @@ func GetNetURL(c *gin.Context) {
 
 	cl := pb.NewXchainClient(conn)
 	header := &pb.Header{
-		Logid:                "",
-		FromNode:             "",
+		Logid:    "",
+		FromNode: "",
 	}
 	in := &pb.CommonIn{
-		Header:               header,
+		Header: header,
 	}
 	rawUrl, err := cl.GetNetURL(ctx, in, grpc.EmptyCallOption{})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
-			"msg":  "get netURL fail, error: "+err.Error(),
+			"msg":  "get netURL fail, error: " + err.Error(),
 		})
 		log.Printf("get netURL fail, err: %s", err.Error())
 		return

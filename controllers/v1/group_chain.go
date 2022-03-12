@@ -1,20 +1,20 @@
 package v1
 
 import (
-	"net/http"
-
+	//"net/http"
+	//
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/contract"
-
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
+	//"github.com/xuperchain/xuper-sdk-go/v2/account"
+	//"github.com/xuperchain/xuper-sdk-go/contract"
+	//
+	//"github.com/superconsensus-chain/xupercc/conf"
+	//"github.com/superconsensus-chain/xupercc/controllers"
+	//log "github.com/superconsensus-chain/xupercc/utils"
 )
 
 func GroupChain(c *gin.Context) {
 
-	req := new(controllers.Req)
+	/*req := new(controllers.Req)
 	err := c.ShouldBind(req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -57,5 +57,5 @@ func GroupChain(c *gin.Context) {
 		query(c, req, wasmContract)
 	} else {
 		invoke(c, req, wasmContract, "listChain")
-	}
+	}*/
 }

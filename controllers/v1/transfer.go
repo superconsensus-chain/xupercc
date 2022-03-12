@@ -1,17 +1,19 @@
 package v1
 
 import (
+	"encoding/hex"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/transfer"
+	"github.com/xuperchain/xuper-sdk-go/v2/account"
+	//"github.com/xuperchain/xuper-sdk-go/transfer"
 
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
-	log "github.com/xuperchain/xupercc/utils"
+	"github.com/superconsensus-chain/xupercc/conf"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	log "github.com/superconsensus-chain/xupercc/utils"
 )
 
 func Transfer(c *gin.Context) {
@@ -38,16 +40,22 @@ func Transfer(c *gin.Context) {
 		return
 	}
 
-	//转账
+	/*//转账
 	trans := transfer.InitTrans(acc, req.Node, req.BcName)
 	//给服务费用的地址
 	trans.Cfg.ComplianceCheck.ComplianceCheckEndorseServiceAddr = acc.Address
 	//服务地址
-	trans.Cfg.EndorseServiceHost = req.Node
+	trans.Cfg.EndorseServiceHost = req.Node*/
 
 	amount := strconv.FormatInt(req.Amount, 10)
 	fee := strconv.FormatInt(req.Fee, 10)
-	txid, err := trans.Transfer(req.To, amount, fee, req.Desc)
+	xclient, err := xuper.New(req.Node)
+	if err != nil {
+		return
+	}
+	// need fee
+	tx, err := xclient.Transfer(acc, req.To, amount)
+	//txid, err := trans.Transfer(req.To, amount, fee, req.Desc)
 	if err != nil {
 		msg := err.Error()
 		if strings.Contains(msg, controllers.ErrorNotEnoughUtxo) {
@@ -66,14 +74,15 @@ func Transfer(c *gin.Context) {
 	gas, _ := strconv.ParseInt(fee, 10, 64)
 
 	//查询余额
-	balance, err := trans.GetBalance()
+	balance, err := xclient.QueryBalance(acc.Address)
+	//balance, err := trans.GetBalance()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":  400,
 			"msg":   "转账成功，但查询余额失败",
 			"error": err.Error(),
 			"resp": controllers.Result{
-				Txid:    txid,
+				Txid:    hex.EncodeToString(tx.Tx.Txid),
 				GasUsed: gas,
 			},
 		})
@@ -86,8 +95,8 @@ func Transfer(c *gin.Context) {
 		"code": 200,
 		"msg":  "转账成功",
 		"resp": controllers.Result{
-			Txid:           txid,
-			AccountBalance: balance,
+			Txid:           hex.EncodeToString(tx.Tx.Txid),
+			AccountBalance: balance.String(),
 			GasUsed:        gas,
 		},
 	})

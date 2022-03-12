@@ -1,20 +1,20 @@
 package v0
 
 import (
-	"log"
-	"net/http"
+	//"log"
+	//"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/contract"
-
-	"github.com/xuperchain/xupercc/conf"
-	"github.com/xuperchain/xupercc/controllers"
+	//"github.com/xuperchain/xuper-sdk-go/v2/account"
+	//"github.com/xuperchain/xuper-sdk-go/contract"
+	//
+	//"github.com/superconsensus-chain/xupercc/conf"
+	//"github.com/superconsensus-chain/xupercc/controllers"
 )
 
 func Deploy(c *gin.Context) {
 
-	req := new(controllers.Req)
+	/*req := new(controllers.Req)
 	err := c.ShouldBind(req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -66,7 +66,7 @@ func Deploy(c *gin.Context) {
 		"code": 200,
 		"msg":  "部署成功",
 		"resp": Result{txid},
-	})
+	})*/
 }
 
 type Result struct {

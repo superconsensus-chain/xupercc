@@ -1,10 +1,13 @@
 package test
 
 import (
+	"encoding/hex"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
+	"io/ioutil"
 	"testing"
 
-	"github.com/xuperchain/xuper-sdk-go/account"
-	"github.com/xuperchain/xuper-sdk-go/contract"
+	"github.com/xuperchain/xuper-sdk-go/v2/account"
+	//"github.com/xuperchain/xuper-sdk-go/contract"
 )
 
 func TestAccount(t *testing.T) {
@@ -29,10 +32,19 @@ var (
 
 func TestDeploy(t *testing.T) {
 	acc, _ := account.RetrieveAccount(mnemonic, language)
-	wasmContract := contract.InitWasmContract(acc, node, bcname, contractName, contractAccount)
-	txid, err := wasmContract.DeployWasmContract(args, contractFile, runtime)
+	//wasmContract := contract.InitWasmContract(acc, node, bcname, contractName, contractAccount)
+	xclient, err := xuper.New(node)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(txid)
+	contractCode, err := ioutil.ReadFile(contractFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx, err := xclient.DeployWasmContract(acc, contractName, contractCode, args)
+	//txid, err := wasmContract.DeployWasmContract(args, contractFile, runtime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(hex.EncodeToString(tx.Tx.Txid))
 }

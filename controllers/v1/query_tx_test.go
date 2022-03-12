@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/xuperchain/xupercc/controllers"
+	"github.com/superconsensus-chain/xupercc/controllers"
 )
 
 func TestQueryTx(t *testing.T) {

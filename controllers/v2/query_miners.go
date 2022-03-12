@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuper-sdk-go/pb"
-	"github.com/xuperchain/xupercc/controllers"
+	"github.com/superconsensus-chain/xupercc/controllers"
+	"github.com/xuperchain/xuperchain/service/pb"
 	"google.golang.org/grpc"
 	"log"
 	"net/http"
@@ -39,7 +39,7 @@ func QueryMiners(c *gin.Context) {
 	defer cancel()
 	client := pb.NewXchainClient(conn)
 
-	request := &pb.DposStatusRequest{
+	request := &pb.ConsensusStatRequest{
 		Bcname: req.BcName,
 	}
 	//response, err := client.DposStatus(ctx, request)
@@ -64,9 +64,9 @@ func QueryMiners(c *gin.Context) {
 	//	return
 	//}
 	type ValidatorsInfo struct {
-		Validators		[]string	`json:"validators"`
-		Miner			string		`json:"miner"`
-		Curterm			int32		`json:"curterm"`
+		Validators []string `json:"validators"`
+		Miner      string   `json:"miner"`
+		Curterm    int32    `json:"curterm"`
 		//Contract 		string		`json:"contract"`
 	}
 	var validatorsInfo = ValidatorsInfo{}
@@ -78,13 +78,13 @@ func QueryMiners(c *gin.Context) {
 		})
 		return
 	}
-	var minersInfo = &pb.ConsensusStatus{
-		Term: 			validatorsInfo.Curterm,
-		Version:        response.Version,
-		ConsensusName:  response.ConsensusName,
-		StartHeight:    response.StartHeight,
-		Miner: 			validatorsInfo.Miner,
-		Validators: 	validatorsInfo.Validators,
+	type ConsensusStatusResp struct {
+		Term          int32
+		Version       string
+		ConsensusName string
+		StartHeight   string
+		Miner         string
+		Validators    []string
 	}
 	//nodes := response.GetStatus().CheckResult
 	//nodesBytes, _ := json.Marshal(nodes)
@@ -92,7 +92,13 @@ func QueryMiners(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "查询成功",
-		//"resp": string(nodesBytes),
-		"resp": minersInfo,
+		"resp": ConsensusStatusResp{
+			Term:          validatorsInfo.Curterm,
+			Version:       response.Version,
+			ConsensusName: response.ConsensusName,
+			StartHeight:   response.StartHeight,
+			Miner:         validatorsInfo.Miner,
+			Validators:    validatorsInfo.Validators,
+		},
 	})
 }
