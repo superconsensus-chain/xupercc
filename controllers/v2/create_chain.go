@@ -97,13 +97,13 @@ func CreateChain(c *gin.Context) {
 	}
 	request, err := xuper.NewRequest(acc, "xkernel", "$parachain", req.Args["method"], invokeRequests.Args, "", "", xuper.WithBcname(req.BcName), xuper.WithFee(fee))
 	if err != nil {
-		record(c, err.Error())
+		record(c, "创建平行链失败", err.Error())
 		log.Println("new request failed, error=", err)
 		return
 	}
 	xclient, err := xuper.New(req.Node, xuper.WithConfigFile("./conf/sdk.yaml"))
 	if err != nil {
-		record(c, err.Error())
+		record(c, "创建平行链失败", err.Error())
 		log.Println("new xclient failed, error=", err)
 		return
 	}
@@ -111,7 +111,7 @@ func CreateChain(c *gin.Context) {
 	//	方法一
 	_, err = xclient.PreExecTx(request)
 	if err != nil {
-		record(c, err.Error())
+		record(c, "创建平行链失败", err.Error())
 		log.Println("pre exec tx failed, error=", err)
 		return
 	}
@@ -206,10 +206,10 @@ func CreateChain(c *gin.Context) {
 	})
 }
 
-func record(c *gin.Context, msg string) {
+func record(c *gin.Context, msg, err string) {
 	c.JSON(http.StatusBadRequest, gin.H{
 		"code":  400,
-		"msg":   "创建平行链失败",
-		"error": msg,
+		"msg":   msg,
+		"error": err,
 	})
 }

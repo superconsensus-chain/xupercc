@@ -38,11 +38,13 @@ func MethodAcl(c *gin.Context) {
 
 	//所有地址的权限都是1
 	ask := make(map[string]float64)
-	for _, v := range req.Address { // todo 这里只是把每个add都设置为可调用，并没有将个别剔除，待优化
+	for _, v := range req.Address {
 		ask[v] = 1
 	}
 	xclient, err := xuper.New(req.Node)
 	if err != nil {
+		record(c, "设置合约方法权限失败", err.Error())
+		log.Println("set contract account method new xclient failed, error=", err)
 		return
 	}
 	newacl := &xuper.ACL{
@@ -52,8 +54,16 @@ func MethodAcl(c *gin.Context) {
 		},
 		AksWeight: ask,
 	}
-	tx, err := xclient.SetMethodACL(acc, req.ContractName, req.MethodName, newacl)
+	err = acc.SetContractAccount(req.ContractAccount)
 	if err != nil {
+		record(c, "设置合约方法权限失败", err.Error())
+		log.Println("set method acl: set request contract account failed, error=", err)
+		return
+	}
+	tx, err := xclient.SetMethodACL(acc, req.ContractName, req.MethodName, newacl, xuper.WithBcname(req.BcName))
+	if err != nil {
+		record(c, "设置合约方法权限失败", err.Error())
+		log.Println("set contract account method acl failed, error=", err)
 		return
 	}
 

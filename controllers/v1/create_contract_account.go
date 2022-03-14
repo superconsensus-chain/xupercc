@@ -38,15 +38,21 @@ func CreateContractAccount(c *gin.Context) {
 
 	xclient, err := xuper.New(req.Node)
 	if err != nil {
+		record(c, "创建合约账户失败", err.Error())
+		log.Println("create contract account: new xclient failed, error=", err)
 		return
 	}
-	tx, err := xclient.CreateContractAccount(acc, "XC"+req.ContractAccount+"@"+req.BcName)
+	tx, err := xclient.CreateContractAccount(acc, "XC"+req.ContractAccount+"@"+req.BcName, xuper.WithBcname(req.BcName))
 	if err != nil {
+		record(c, "创建合约账户失败", err.Error())
+		log.Println("create contract account: xclient create contract account failed, error=", err)
 		return
 	}
 	acl := xuper.ACL{}
 	err = json.Unmarshal(tx.ContractResponse.Body, &acl)
 	if err != nil {
+		record(c, "创建合约账户失败", err.Error())
+		log.Println("create contract account: acl unmarshal failed, error=", err)
 		return
 	}
 

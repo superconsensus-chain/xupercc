@@ -1,15 +1,10 @@
 package v1
 
 import (
-	"context"
-	"encoding/hex"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xuperchain/xuperchain/service/pb"
-	//"github.com/xuperchain/xuper-sdk-go/transfer"
-	"google.golang.org/grpc"
 
 	"github.com/superconsensus-chain/xupercc/controllers"
 	log "github.com/superconsensus-chain/xupercc/utils"
@@ -77,7 +72,28 @@ func QueryTx(c *gin.Context) {
 		return
 	}
 
-	rawTxid, err := hex.DecodeString(req.Txid)
+	xclient, err := xuper.New(req.Node)
+	if err != nil {
+		record(c, "查询交易失败", err.Error())
+		log.Println("query tx: new xclient failed, error=", err)
+		return
+	}
+
+	tx, err := xclient.QueryTxByID(req.Txid, xuper.WithQueryBcname(req.BcName))
+	if err != nil {
+		record(c, "查询交易失败", err.Error())
+		log.Println("query tx failed, error=", err)
+		return
+	}
+
+	respTx := log.FullTx(tx)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg": "查询成功",
+		"resp": respTx,
+	})
+
+	/*rawTxid, err := hex.DecodeString(req.Txid)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
@@ -130,5 +146,5 @@ func QueryTx(c *gin.Context) {
 		"code": 200,
 		"msg":  "查询成功",
 		"resp": tx,
-	})
+	})*/
 }

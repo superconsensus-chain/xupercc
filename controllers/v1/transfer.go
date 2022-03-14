@@ -51,10 +51,12 @@ func Transfer(c *gin.Context) {
 	fee := strconv.FormatInt(req.Fee, 10)
 	xclient, err := xuper.New(req.Node)
 	if err != nil {
+		record(c, "转账失败", err.Error())
+		log.Println("transfer failed, error=", err)
 		return
 	}
 	// need fee
-	tx, err := xclient.Transfer(acc, req.To, amount)
+	tx, err := xclient.Transfer(acc, req.To, amount, xuper.WithBcname(req.BcName), xuper.WithFee(fee))
 	//txid, err := trans.Transfer(req.To, amount, fee, req.Desc)
 	if err != nil {
 		msg := err.Error()
@@ -74,7 +76,7 @@ func Transfer(c *gin.Context) {
 	gas, _ := strconv.ParseInt(fee, 10, 64)
 
 	//查询余额
-	balance, err := xclient.QueryBalance(acc.Address)
+	balance, err := xclient.QueryBalance(acc.Address, xuper.WithQueryBcname(req.BcName))
 	//balance, err := trans.GetBalance()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

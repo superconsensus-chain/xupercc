@@ -200,13 +200,13 @@ func deploy(c *gin.Context, req *controllers.Req) {
 	xclinet, err := xuper.New(req.Node)
 	if err != nil {
 		log.Println("xupercc new xchain client err", err)
-		record(c, err.Error())
+		record(c, "合约部署/升级失败", err.Error())
 		return
 	}
 	setContractE := acc.SetContractAccount(req.ContractAccount)
 	if setContractE != nil {
 		log.Printf("set contract account failed, error=", setContractE)
-		record(c, setContractE.Error())
+		record(c, "合约部署/升级失败", setContractE.Error())
 		return
 	}
 	tx := &xuper.Transaction{}
@@ -215,21 +215,21 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		contractCode, err := ioutil.ReadFile(file)
 		if err != nil {
 			log.Printf("get wasm contract filed, error=%s, filepath=%s", err, file)
-			record(c, err.Error())
+			record(c, "合约部署/升级失败", err.Error())
 			return
 		}
 		if req.Upgrade {
 			tx, err = xclinet.UpgradeWasmContract(acc, req.ContractName, contractCode, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("upgrade wasm contract failed, error=", err)
-				record(c, err.Error())
+				record(c, "合约升级失败", err.Error())
 				return
 			}
 		} else {
 			tx, err = xclinet.DeployWasmContract(acc, req.ContractName, contractCode, req.Args, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("deploy wasm contract failed, error=", err)
-				record(c, err.Error())
+				record(c, "合约部署失败", err.Error())
 				return
 			}
 		}
@@ -238,21 +238,21 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		contractcode, err := ioutil.ReadFile(file)
 		if err != nil {
 			log.Println("get go native contract code filed, error=", err)
-			record(c, err.Error())
+			record(c, "合约部署/升级失败", err.Error())
 			return
 		}
 		if req.Upgrade {
 			tx, err = xclinet.UpgradeNativeContract(acc, req.ContractName, contractcode, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("upgrade native contract failed, error=", err)
-				record(c, err.Error())
+				record(c, "合约升级失败", err.Error())
 				return
 			}
 		} else {
 			tx, err = xclinet.DeployNativeGoContract(acc, req.ContractName, contractcode, req.Args, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("deploy native go contract failed, error=", err)
-				record(c, err.Error())
+				record(c, "合约部署失败", err.Error())
 				return
 			}
 		}
@@ -260,7 +260,7 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		// solidity合约暂不支持升级
 		if req.Upgrade {
 			log.Println("solidity合约暂不支持升级")
-			record(c, "solidity合约暂不支持升级")
+			record(c, "合约升级失败", "solidity合约暂不支持升级")
 			return
 		}
 		binfile := filepath.Join(conf.Code.WasmPath, req.ContractName, req.ContractName+".bin")
@@ -269,7 +269,7 @@ func deploy(c *gin.Context, req *controllers.Req) {
 			log.Println("get go native contract code filed, error=", err)
 			// 因为接口不规范传参导致无法部署的合约编译结果就删了
 			os.RemoveAll(filepath.Join(conf.Code.WasmPath, req.ContractName))
-			record(c, "注意参数规范，contract_name应与源代码中声明的主合约名一致")
+			record(c, "合约部署失败", "注意参数规范，contract_name应与源代码中声明的主合约名一致")
 			return
 		}
 		abifile := filepath.Join(conf.Code.WasmPath, req.ContractName, req.ContractName+".abi")
@@ -277,17 +277,17 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		if err != nil {
 			log.Println("get go native contract code filed, error=", err)
 			os.RemoveAll(filepath.Join(conf.Code.WasmPath, req.ContractName))
-			record(c, "注意参数规范，contract_name应与源代码中声明的主合约名一致")
+			record(c, "合约部署失败", "注意参数规范，contract_name应与源代码中声明的主合约名一致")
 			return
 		}
 		tx, err = xclinet.DeployEVMContract(acc, req.ContractName, abicode, bincode, req.Args, xuper.WithBcname(req.BcName))
 		if err != nil {
 			log.Println("deploy evm contract failed, error=", err)
-			record(c, err.Error())
+			record(c, "合约部署失败", err.Error())
 			return
 		}
 	} else {
-		record(c, "不支持的合约语言")
+		record(c, "合约部署失败", "不支持的合约语言")
 		return
 	}
 
@@ -301,10 +301,11 @@ func deploy(c *gin.Context, req *controllers.Req) {
 	})
 }
 
-func record(c *gin.Context, err string) {
+// 记录gin上下文错误
+func record(c *gin.Context, msg, err string) {
 	c.JSON(http.StatusBadRequest, gin.H{
 		"code":  400,
-		"msg":   "部署失败",
+		"msg":   msg,
 		"error": err,
 	})
 }

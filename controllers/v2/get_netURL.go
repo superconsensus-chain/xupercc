@@ -1,14 +1,11 @@
 package v2
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/superconsensus-chain/xupercc/controllers"
 	log "github.com/superconsensus-chain/xupercc/utils"
-	"github.com/xuperchain/xuperchain/service/pb"
-	"google.golang.org/grpc"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 	"net/http"
-	"time"
 )
 
 func GetNetURL(c *gin.Context) {
@@ -24,7 +21,30 @@ func GetNetURL(c *gin.Context) {
 		return
 	}
 
-	conn, err := grpc.Dial(req.Node, grpc.WithInsecure(), grpc.WithMaxMsgSize(64<<20-1))
+	xclient, err := xuper.New(req.Node)
+	if err != nil {
+		record(c, "获取netURL失败", err.Error())
+		log.Println("netURL new xclient failed, error=", err)
+		return
+	}
+
+	url, err := xclient.QueryNetURL()
+	if err != nil {
+		record(c, "获取netURL失败", err.Error())
+		log.Println("get netURL failed, error=", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "调用成功",
+		"resp": controllers.Result{
+			Data:    url,
+		},
+	})
+	return
+
+	/*conn, err := grpc.Dial(req.Node, grpc.WithInsecure(), grpc.WithMaxMsgSize(64<<20-1))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
@@ -62,5 +82,5 @@ func GetNetURL(c *gin.Context) {
 			Address: req.Account,
 		},
 	})
-	return
+	return*/
 }

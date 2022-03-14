@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 	"net/http"
 	"time"
 
@@ -158,7 +159,41 @@ func QueryBlock(c *gin.Context) {
 		return
 	}
 
-	iblock, err := GetChainBlock(req.Node, req.BcName, req.BlockID, req.BlockHeight)
+	xclient, err := xuper.New(req.Node)
+	if err != nil {
+		record(c, "查询块失败", err.Error())
+		log.Println("query block: new xclient failed, error=", err)
+		return
+	}
+
+	var blk *pb.Block
+	if req.BlockID != "" {
+		blk, err = xclient.QueryBlockByID(req.BlockID, xuper.WithQueryBcname(req.BcName))
+	}else if req.BlockHeight != 0 {
+		blk, err = xclient.QueryBlockByHeight(req.BlockHeight, xuper.WithQueryBcname(req.BcName))
+	}else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  "查询块失败，检查参数",
+		})
+	}
+	if err != nil {
+		record(c, "查询块失败", err.Error())
+		log.Println("query block by id failed, error=", err)
+		return
+	}
+
+	// 对blk的[]byte字段转换
+	internalBlk := log.SimpleBlock(blk.GetBlock())
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "查询成功",
+		"resp": internalBlk,
+	})
+	return
+
+	/*iblock, err := GetChainBlock(req.Node, req.BcName, req.BlockID, req.BlockHeight)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
@@ -171,5 +206,5 @@ func QueryBlock(c *gin.Context) {
 		"code": 200,
 		"msg":  "查询成功",
 		"resp": iblock,
-	})
+	})*/
 }

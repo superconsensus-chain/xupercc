@@ -11,7 +11,6 @@ import (
 	"github.com/superconsensus-chain/xupercc/conf"
 	"github.com/superconsensus-chain/xupercc/controllers"
 	log "github.com/superconsensus-chain/xupercc/utils"
-	//"github.com/superconsensus-chain/xupercc/xkernel"
 )
 
 func AccountAcl(c *gin.Context) {
@@ -40,11 +39,13 @@ func AccountAcl(c *gin.Context) {
 	//所有地址的权限都是1
 	ask := make(map[string]float64)
 	for _, v := range req.Address {
-		ask[v] = 1
+		ask[v] = 1	// todo req.Address=>map[string]float64
 	}
 
 	xclient, err := xuper.New(req.Node)
 	if err != nil {
+		record(c, "设置账户权限失败", err.Error())
+		log.Println("set account: new xclient failed, error=", err)
 		return
 	}
 	newacl := xuper.ACL{
@@ -54,8 +55,15 @@ func AccountAcl(c *gin.Context) {
 		},
 		AksWeight: ask,
 	}
-	tx, err := xclient.SetAccountACL(acc, &newacl)
+	err = acc.SetContractAccount(req.ContractAccount)
 	if err != nil {
+		record(c, "设置账户权限失败", err.Error())
+		log.Println("set account acl: request set contract account failed, error=", err)
+	}
+	tx, err := xclient.SetAccountACL(acc, &newacl, xuper.WithBcname(req.BcName))
+	if err != nil {
+		record(c, "设置账户权限失败", err.Error())
+		log.Println("set account failed, error=", err)
 		return
 	}
 
