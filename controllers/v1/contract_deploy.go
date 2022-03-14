@@ -66,7 +66,7 @@ func ContractDeploy(c *gin.Context) {
 func check(c *gin.Context, req *controllers.Req) bool {
 
 	//格式检查
-	if req.Runtime != "c" && req.Runtime != "go" && req.Runtime != "solidity" {
+	if req.Runtime != "c" && req.Runtime != "go" && req.Runtime != "solidity" && req.Runtime != "c++"{
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 400,
 			"msg":  "合约格式无效，当前只支持c和go以及solidity",
@@ -127,7 +127,7 @@ func save(c *gin.Context, req *controllers.Req) bool {
 	var filename string //文件保存名称
 	if req.Runtime == "go" {
 		filename = req.ContractName + ".go"
-	} else if req.Runtime == "c" {
+	} else if req.Runtime == "c" || req.Runtime == "c++" {
 		filename = req.ContractName + ".cc"
 	} else if req.Runtime == "solidity" {
 		filename = req.ContractName + ".sol"
@@ -159,7 +159,7 @@ func build(c *gin.Context, req *controllers.Req) bool {
 		err = controllers.BuildGo(filename)
 		//wasmfile = conf.Code.WasmPath + req.ContractName + ".go.wasm"
 		builtFile = filepath.Join(conf.Code.WasmPath, req.ContractName+".go.native")
-	} else if req.Runtime == "c" {
+	} else if req.Runtime == "c" || req.Runtime == "c++" {
 		filename := req.ContractName + ".cc"
 		err = controllers.BuildCC(filename)
 		//wasmfile = conf.Code.WasmPath + req.ContractName + ".wasm"
