@@ -10,6 +10,7 @@ import (
 	"github.com/xuperchain/xuper-sdk-go/v2/account"
 	"github.com/xuperchain/xuper-sdk-go/v2/xuper"
 	"github.com/xuperchain/xuperchain/service/pb"
+	"math/big"
 	"net/http"
 )
 
@@ -88,22 +89,20 @@ func CreateChain(c *gin.Context) {
 	if args.Admin != "" {
 		invokeRequests.Args["admin"] = []byte(args.Admin)
 	}
-	// -100是因为conf/sdk.yaml文件中创链配置fee为100，xuper.NewRequest()参数带xuper.WithFee会额外加上yaml文件中的100
-	fee := "999900"
-	var  gas int64 = 1000000
-	if invokeRequests.MethodName == "createChain" {
-		fee = "99999999900"
-		gas = 100000000000
-	}
-	request, err := xuper.NewRequest(acc, "xkernel", "$parachain", req.Args["method"], invokeRequests.Args, "", "", xuper.WithBcname(req.BcName), xuper.WithFee(fee))
+
+	// 请求交易手续费，其中100是parachain系统合约的xfee
+	realFee := big.NewInt(req.Fee - 100)
+
+	request, err := xuper.NewRequest(acc, "xkernel", "$parachain", req.Args["method"], invokeRequests.Args, "", "", xuper.WithBcname(req.BcName), xuper.WithFee(realFee.String()))
 	if err != nil {
-		record(c, "创建平行链失败", err.Error())
+		record(c, "调用失败", err.Error())
 		log.Println("new request failed, error=", err)
 		return
 	}
+
 	xclient, err := xuper.New(req.Node, xuper.WithConfigFile("./conf/sdk.yaml"))
 	if err != nil {
-		record(c, "创建平行链失败", err.Error())
+		record(c, "调用失败", err.Error())
 		log.Println("new xclient failed, error=", err)
 		return
 	}
@@ -111,13 +110,14 @@ func CreateChain(c *gin.Context) {
 	//	方法一
 	_, err = xclient.PreExecTx(request)
 	if err != nil {
-		record(c, "创建平行链失败", err.Error())
+		record(c, "调用失败", err.Error())
 		log.Println("pre exec tx failed, error=", err)
 		return
 	}
 	postTx, err := xclient.Do(request)
-	fmt.Println("do tx", err)
 	if err != nil {
+		record(c, "创建平行链失败", err.Error())
+		log.Println("post create chain tx failed, error=", err)
 		return
 	}
 
@@ -200,7 +200,7 @@ func CreateChain(c *gin.Context) {
 		"msg":  "调用成功",
 		"resp": controllers.Result{
 			Txid:    hex.EncodeToString(postTx.Tx.Txid),
-			GasUsed: gas,
+			GasUsed: realFee.Int64() + 100,
 			Data:    string(postTx.ContractResponse.Body),
 		},
 	})
