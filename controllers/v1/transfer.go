@@ -47,14 +47,20 @@ func Transfer(c *gin.Context) {
 	//服务地址
 	trans.Cfg.EndorseServiceHost = req.Node*/
 
-	amount := strconv.FormatInt(req.Amount, 10)
-	fee := strconv.FormatInt(req.Fee, 10)
 	xclient, err := xuper.New(req.Node)
 	if err != nil {
 		record(c, "转账失败", err.Error())
 		log.Println("transfer failed, error=", err)
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		log.Println("query block close xclient failed, error=", closeErr)
+	}()
+
+	amount := strconv.FormatInt(req.Amount, 10)
+	fee := strconv.FormatInt(req.Fee, 10)
+
 	// need fee
 	tx, err := xclient.Transfer(acc, req.To, amount, xuper.WithBcname(req.BcName), xuper.WithFee(fee))
 	//txid, err := trans.Transfer(req.To, amount, fee, req.Desc)

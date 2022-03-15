@@ -48,6 +48,11 @@ func AccountAcl(c *gin.Context) {
 		log.Println("set account: new xclient failed, error=", err)
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		log.Println("query block close xclient failed, error=", closeErr)
+	}()
+
 	newacl := xuper.ACL{
 		PM: xuper.PermissionModel{
 			Rule:        1,

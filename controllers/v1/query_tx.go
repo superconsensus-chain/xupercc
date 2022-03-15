@@ -78,6 +78,10 @@ func QueryTx(c *gin.Context) {
 		log.Println("query tx: new xclient failed, error=", err)
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		log.Println("query block close xclient failed, error=", closeErr)
+	}()
 
 	tx, err := xclient.QueryTxByID(req.Txid, xuper.WithQueryBcname(req.BcName))
 	if err != nil {

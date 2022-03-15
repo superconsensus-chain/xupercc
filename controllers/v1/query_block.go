@@ -165,6 +165,10 @@ func QueryBlock(c *gin.Context) {
 		log.Println("query block: new xclient failed, error=", err)
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		log.Println("query block close xclient failed, error=", closeErr)
+	}()
 
 	var blk *pb.Block
 	if req.BlockID != "" {

@@ -26,6 +26,10 @@ func QueryAcl(c *gin.Context) {
 		log.Println("query acl: new xclient failed, error=", err)
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		log.Println("query block close xclient failed, error=", closeErr)
+	}()
 
 	const(
 		AccountSuccess = "查询合约账户acl成功"

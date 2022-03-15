@@ -38,6 +38,10 @@ func ContractInvoke(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		log.Println("query block close xclient failed, error=", closeErr)
+	}()
 
 	tx := &xuper.Transaction{}
 	if req.ModuleName == "wasm" {
