@@ -119,7 +119,8 @@ func save(c *gin.Context, req *controllers.Req) bool {
 			"msg":   "系统内部错误",
 			"error": err.Error(),
 		})
-		log.Printf("mkdir fail, err: %s", err.Error())
+		pwd, pwdErr := os.Getwd()
+		log.Printf("mkdir fail, err: %s, now path: ---%s---, get pwd err: %s", err.Error(), pwd, pwdErr)
 		return false
 	}
 
@@ -197,7 +198,7 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		return
 	}
 
-	xclinet, err := xuper.New(req.Node)
+	xclient, err := xuper.New(req.Node)
 	if err != nil {
 		log.Println("xupercc new xchain client err", err)
 		record(c, "合约部署/升级失败", err.Error())
@@ -210,7 +211,7 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		return
 	}
 	tx := &xuper.Transaction{}
-	if req.Runtime == "c" {
+	if req.Runtime == "c" || req.Runtime == "c++" {
 		file := filepath.Join(conf.Code.WasmPath, req.ContractName+".wasm")
 		contractCode, err := ioutil.ReadFile(file)
 		if err != nil {
@@ -219,14 +220,14 @@ func deploy(c *gin.Context, req *controllers.Req) {
 			return
 		}
 		if req.Upgrade {
-			tx, err = xclinet.UpgradeWasmContract(acc, req.ContractName, contractCode, xuper.WithBcname(req.BcName))
+			tx, err = xclient.UpgradeWasmContract(acc, req.ContractName, contractCode, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("upgrade wasm contract failed, error=", err)
 				record(c, "合约升级失败", err.Error())
 				return
 			}
 		} else {
-			tx, err = xclinet.DeployWasmContract(acc, req.ContractName, contractCode, req.Args, xuper.WithBcname(req.BcName))
+			tx, err = xclient.DeployWasmContract(acc, req.ContractName, contractCode, req.Args, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("deploy wasm contract failed, error=", err)
 				record(c, "合约部署失败", err.Error())
@@ -242,14 +243,14 @@ func deploy(c *gin.Context, req *controllers.Req) {
 			return
 		}
 		if req.Upgrade {
-			tx, err = xclinet.UpgradeNativeContract(acc, req.ContractName, contractcode, xuper.WithBcname(req.BcName))
+			tx, err = xclient.UpgradeNativeContract(acc, req.ContractName, contractcode, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("upgrade native contract failed, error=", err)
 				record(c, "合约升级失败", err.Error())
 				return
 			}
 		} else {
-			tx, err = xclinet.DeployNativeGoContract(acc, req.ContractName, contractcode, req.Args, xuper.WithBcname(req.BcName))
+			tx, err = xclient.DeployNativeGoContract(acc, req.ContractName, contractcode, req.Args, xuper.WithBcname(req.BcName))
 			if err != nil {
 				log.Println("deploy native go contract failed, error=", err)
 				record(c, "合约部署失败", err.Error())
@@ -280,7 +281,7 @@ func deploy(c *gin.Context, req *controllers.Req) {
 			record(c, "合约部署失败", "注意参数规范，contract_name应与源代码中声明的主合约名一致")
 			return
 		}
-		tx, err = xclinet.DeployEVMContract(acc, req.ContractName, abicode, bincode, req.Args, xuper.WithBcname(req.BcName))
+		tx, err = xclient.DeployEVMContract(acc, req.ContractName, abicode, bincode, req.Args, xuper.WithBcname(req.BcName))
 		if err != nil {
 			log.Println("deploy evm contract failed, error=", err)
 			record(c, "合约部署失败", err.Error())

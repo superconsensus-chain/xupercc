@@ -55,7 +55,16 @@ func BuildCC(ccfile string) error {
 	}
 
 	// 设置xdev编译环境
-	exec.Command("export", "XDEV_ROOT=./xdev").Run()
+	xdevPath, err := filepath.Abs("xdev")
+	if err != nil {
+		log.Println("获取xdev绝对路径失败", err)
+		return err
+	}
+	err = os.Setenv("XDEV_ROOT", xdevPath)
+	if err != nil {
+		log.Println("设置XDEV_ROOT环境失败", err)
+		return err
+	}
 
 	// 切换目录，等效cd命令
 	os.Chdir(buildDir)
@@ -66,12 +75,14 @@ func BuildCC(ccfile string) error {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Printf("c合约编译错误，可能是docker服务没有启动")
+		log.Printf("c合约编译错误，可能是docker服务没有启动; $XDEV_ROOT环境: %s", os.Getenv("XDEV_ROOT"))
+		os.Chdir("../../")
 		return err
 	}
 
 	if !strings.Contains(string(output), "LD wasm") {
 		log.Println("c合约编译失败", string(output))
+		os.Chdir("../../")
 		return fmt.Errorf("build desc: cmd: %s output: %s", cmd.String(), string(output))
 	}
 	// 移动编译好的文件后回到项目根目录
