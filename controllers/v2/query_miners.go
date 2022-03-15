@@ -79,12 +79,12 @@ func QueryMiners(c *gin.Context) {
 		return
 	}
 	type ConsensusStatusResp struct {
-		Term          int32
-		Version       string
-		ConsensusName string
-		StartHeight   string
-		Miner         string
-		Validators    []string
+		Term          int32		`json:"term"`
+		Version       string	`json:"version"`
+		ConsensusName string	`json:"consensus_name"`
+		StartHeight   string	`json:"start_height"`
+		Miner         string	`json:"miner"`
+		Validators    []string	`json:"validators"`
 	}
 	//nodes := response.GetStatus().CheckResult
 	//nodesBytes, _ := json.Marshal(nodes)
