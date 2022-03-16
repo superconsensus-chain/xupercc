@@ -92,6 +92,11 @@ func CreateChain(c *gin.Context) {
 
 	// 请求交易手续费，其中100是parachain系统合约的xfee
 	realFee := big.NewInt(req.Fee - 100)
+	if realFee.Int64() < 0 {
+		// 创链才会需要高gas，parachain其它操作都是系统合约级操作，gas固定是100
+		// 因此对创链外的方法可以不传fee，不传时realFee经过上面-100后为负，需要这里置0，最终gas才能正常消耗100
+		realFee.SetInt64(0)
+	}
 
 	request, err := xuper.NewRequest(acc, "xkernel", "$parachain", req.Args["method"], invokeRequests.Args, "", "", xuper.WithBcname(req.BcName), xuper.WithFee(realFee.String()))
 	if err != nil {
