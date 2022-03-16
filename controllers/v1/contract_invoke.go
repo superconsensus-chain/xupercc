@@ -64,6 +64,14 @@ func ContractInvoke(c *gin.Context) {
 		} else {
 			tx, err = xclient.InvokeEVMContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
 		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code"	:	400,
+			"msg"	:	"调用失败",
+			"error"	:	"module_name参数缺失或格式错误",
+			"hint"	:	"go合约请传native / c或c++合约传wasm / solidity合约传evm",
+		})
+		return
 	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
