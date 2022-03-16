@@ -49,7 +49,9 @@ func MethodAcl(c *gin.Context) {
 	}
 	defer func() {
 		closeErr := xclient.Close()
-		log.Println("query block close xclient failed, error=", closeErr)
+		if closeErr != nil {
+			log.Println("set method acl: close xclient failed, error=", closeErr)
+		}
 	}()
 
 	newacl := &xuper.ACL{

@@ -29,7 +29,9 @@ func GetNetURL(c *gin.Context) {
 	}
 	defer func() {
 		closeErr := xclient.Close()
-		log.Println("query block close xclient failed, error=", closeErr)
+		if closeErr != nil {
+			log.Println("get netURL: close xclient failed, error=", closeErr)
+		}
 	}()
 
 	url, err := xclient.QueryNetURL()

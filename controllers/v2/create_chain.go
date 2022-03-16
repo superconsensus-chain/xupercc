@@ -111,6 +111,12 @@ func CreateChain(c *gin.Context) {
 		log.Println("new xclient failed, error=", err)
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		if closeErr != nil {
+			log.Println("create chain: close xclient failed, error=", closeErr)
+		}
+	}()
 
 	//	方法一
 	_, err = xclient.PreExecTx(request)

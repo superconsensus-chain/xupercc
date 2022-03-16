@@ -44,7 +44,9 @@ func CreateContractAccount(c *gin.Context) {
 	}
 	defer func() {
 		closeErr := xclient.Close()
-		log.Println("query block close xclient failed, error=", closeErr)
+		if closeErr != nil {
+			log.Println("create contract account: close xclient failed, error=", closeErr)
+		}
 	}()
 
 	tx, err := xclient.CreateContractAccount(acc, "XC"+req.ContractAccount+"@"+req.BcName, xuper.WithBcname(req.BcName))

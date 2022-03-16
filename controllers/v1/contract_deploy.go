@@ -204,6 +204,12 @@ func deploy(c *gin.Context, req *controllers.Req) {
 		record(c, "合约部署/升级失败", err.Error())
 		return
 	}
+	defer func() {
+		closeErr := xclient.Close()
+		if closeErr != nil {
+			log.Println("contract deploy: close xclient failed, error=", closeErr)
+		}
+	}()
 	setContractE := acc.SetContractAccount(req.ContractAccount)
 	if setContractE != nil {
 		log.Printf("set contract account failed, error=", setContractE)

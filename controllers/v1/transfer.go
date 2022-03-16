@@ -55,7 +55,9 @@ func Transfer(c *gin.Context) {
 	}
 	defer func() {
 		closeErr := xclient.Close()
-		log.Println("query block close xclient failed, error=", closeErr)
+		if closeErr != nil {
+			log.Println("transfer: close xclient failed, error=", closeErr)
+		}
 	}()
 
 	amount := strconv.FormatInt(req.Amount, 10)
