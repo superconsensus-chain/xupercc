@@ -45,6 +45,16 @@ func ContractInvoke(c *gin.Context) {
 		}
 	}()
 
+	// 通过合约账户来调用本次操作
+	if req.ContractAccount != "" {
+		setContractE := acc.SetContractAccount(req.ContractAccount)
+		if setContractE != nil {
+			log.Printf("contract invoke: set contract account failed, error=", setContractE)
+			record(c, "调用失败", setContractE.Error())
+			return
+		}
+	}
+
 	tx := &xuper.Transaction{}
 	if req.ModuleName == "wasm" {
 		if req.Query {
