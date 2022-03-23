@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/hex"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,52 +46,29 @@ func ContractInvoke(c *gin.Context) {
 		}
 	}()
 
-	// 通过合约账户来调用本次操作
-	if req.ContractAccount != "" {
-		setContractE := acc.SetContractAccount(req.ContractAccount)
-		if setContractE != nil {
-			log.Printf("contract invoke: set contract account failed, error=", setContractE)
-			record(c, "调用失败", setContractE.Error())
-			return
-		}
-	}
-
-	tx := &xuper.Transaction{}
-	if req.ModuleName == "wasm" {
-		if req.Query {
-			tx, err = xclient.QueryWasmContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
-		} else {
-			tx, err = xclient.InvokeWasmContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
-		}
-	} else if req.ModuleName == "native" {
-		if req.Query {
-			tx, err = xclient.QueryNativeContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
-		} else {
-			tx, err = xclient.InvokeNativeContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
-		}
-	} else if req.ModuleName == "evm" {
-		if req.Query {
-			tx, err = xclient.QueryEVMContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
-		} else {
-			tx, err = xclient.InvokeEVMContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
-		}
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code"	:	400,
-			"msg"	:	"调用失败",
-			"error"	:	"module_name参数缺失或格式错误",
-			"hint"	:	"go合约请传native / c或c++合约传wasm / solidity合约传evm",
-		})
-		return
-	}
+	// 第一次先用普通账户invoke
+	tx, err := invoke(req, acc, xclient)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":  400,
-			"msg":   "操作失败",
-			"error": err.Error(),
-		})
-		log.Printf("if query [%v] contract fail, err: %s", req.Query, err.Error())
-		return
+		// 失败的话再通过合约账户来调用本次操作
+		if req.ContractAccount != "" {
+			setContractE := acc.SetContractAccount(req.ContractAccount)
+			if setContractE != nil {
+				log.Printf("contract invoke: set contract account failed, error=", setContractE)
+				record(c, "调用失败", setContractE.Error())
+				return
+			}
+			tx, err = invoke(req, acc, xclient)
+			// 第二次通过合约账户调用仍然失败的话就真的是有错误了
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":  400,
+					"msg":   "操作失败",
+					"error": err.Error(),
+				})
+				log.Printf("if query [%v] contract fail, err: %s", req.Query, err.Error())
+				return
+			}
+		}
 	}
 	if !req.Query {
 		c.JSON(http.StatusOK, gin.H{
@@ -132,6 +110,34 @@ func ContractInvoke(c *gin.Context) {
 		} else {
 			invoke(c, req, wasmContract)
 		}*/
+}
+
+// 封装合约调用/查询
+func invoke(req *controllers.Req, acc *account.Account, xclient *xuper.XClient) (*xuper.Transaction, error) {
+	tx := &xuper.Transaction{}
+	var err error
+	if req.ModuleName == "wasm" {
+		if req.Query {
+			tx, err = xclient.QueryWasmContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
+		} else {
+			tx, err = xclient.InvokeWasmContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
+		}
+	} else if req.ModuleName == "native" {
+		if req.Query {
+			tx, err = xclient.QueryNativeContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
+		} else {
+			tx, err = xclient.InvokeNativeContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
+		}
+	} else if req.ModuleName == "evm" {
+		if req.Query {
+			tx, err = xclient.QueryEVMContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
+		} else {
+			tx, err = xclient.InvokeEVMContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
+		}
+	} else {
+		return nil, errors.New("module_name参数缺失或格式错误")
+	}
+	return tx, err
 }
 
 /*//查询的操作
