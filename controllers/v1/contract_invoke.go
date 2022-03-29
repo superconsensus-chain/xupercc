@@ -68,6 +68,9 @@ func ContractInvoke(c *gin.Context) {
 				log.Printf("if query [%v] contract fail, err: %s", req.Query, err.Error())
 				return
 			}
+		}else {
+			log.Println("contract invoke failed, error=", err)
+			record(c, "调用失败", err.Error())
 		}
 	}
 	if !req.Query {
