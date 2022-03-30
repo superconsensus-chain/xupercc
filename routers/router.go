@@ -58,6 +58,7 @@ func NewRouter() *gin.Engine {
 	rv1.POST("create_chain", v2.CreateChain)
 	rv1.POST("get_netURL", v2.GetNetURL)
 	rv1.POST("query_miners", v2.QueryMiners)
+	rv1.POST("addr_trans", v2.AddressTransfer)
 
 	return r
 }
