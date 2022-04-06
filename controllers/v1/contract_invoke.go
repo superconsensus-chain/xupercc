@@ -119,7 +119,8 @@ func ContractInvoke(c *gin.Context) {
 func invoke(req *controllers.Req, acc *account.Account, xclient *xuper.XClient) (*xuper.Transaction, error) {
 	tx := &xuper.Transaction{}
 	var err error
-	if req.ModuleName == "wasm" {
+	// 默认调用c/c++合约
+	if req.ModuleName == "wasm" || req.ModuleName == "" {
 		if req.Query {
 			tx, err = xclient.QueryWasmContract(acc, req.ContractName, req.MethodName, req.Args, xuper.WithBcname(req.BcName))
 		} else {
